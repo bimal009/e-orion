@@ -8,7 +8,7 @@ const Navigations = [
     },
     {
         label: 'Live Now',
-        href: '/live',
+        href: '/dashboard',
     },
     {
         label: 'About Us',

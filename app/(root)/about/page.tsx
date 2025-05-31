@@ -11,29 +11,29 @@ import {
 const AboutUs = () => {
   const teamMembers = [
     {
-      name: "Alex Chen",
-      role: "CEO & Founder",
-      bio: "Former esports broadcaster with 8+ years in competitive gaming production.",
+      name: "Bimal Pandey",
+      role: "Full Stack Devloper",
+      bio: "Developed full Production System.",
       image: "👨‍💼"
     },
-    {
-      name: "Sarah Kim",
-      role: "CTO",
-      bio: "Full-stack developer specializing in real-time data systems and streaming tech.",
-      image: "👩‍💻"
-    },
-    {
-      name: "Marcus Rodriguez",
-      role: "Head of Design",
-      bio: "UI/UX expert focused on creating immersive gaming experiences.",
-      image: "👨‍🎨"
-    },
-    {
-      name: "Emma Johnson",
-      role: "Community Manager",
-      bio: "Connecting with esports communities and gathering feedback from organizers.",
-      image: "👩‍🎤"
-    }
+    // {
+    //   name: "Sarah Kim",
+    //   role: "CTO",
+    //   bio: "Full-stack developer specializing in real-time data systems and streaming tech.",
+    //   image: "👩‍💻"
+    // },
+    // {
+    //   name: "Marcus Rodriguez",
+    //   role: "Head of Design",
+    //   bio: "UI/UX expert focused on creating immersive gaming experiences.",
+    //   image: "👨‍🎨"
+    // },
+    // {
+    //   name: "Emma Johnson",
+    //   role: "Community Manager",
+    //   bio: "Connecting with esports communities and gathering feedback from organizers.",
+    //   image: "👩‍🎤"
+    // }
   ];
 
   const stats = [

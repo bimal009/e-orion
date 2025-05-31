@@ -1,10 +1,21 @@
+"use client"
 import React from 'react'
 import Link from 'next/link'
+import { useSession, signOut } from 'next-auth/react'
 import Navitems from './Navitems'
 import MobileNav from './Mobilenav'
 import { Button } from '../ui/button'
+import { LogOut, User } from 'lucide-react'
 
 const Header = () => {
+    const { data: session, status } = useSession()
+console.log(session)
+    const handleSignOut = () => {
+        signOut({
+            callbackUrl: '/' 
+        })
+    }
+
     return (
         <header className='sticky top-0 z-50 w-full border-b border-border/40 backdrop-blur-md'>
             <div className='container flex h-16 px-4 mx-auto items-center justify-between'>
@@ -23,12 +34,46 @@ const Header = () => {
 
                 {/* Actions */}
                 <div className='flex items-center gap-3'>
-                    
-                    <Link href="/sign-up">
-                        <Button size="sm" className='bg-primary text-white rounded-full px-4 hover:bg-primary/90'>
-                            Sign In
-                        </Button>
-                    </Link>
+                    {status === "loading" ? (
+                        // Loading state
+                        <div className="w-16 h-8  animate-pulse rounded-full"></div>
+                    ) : session ? (
+                        // Logged in state
+                        <div className="flex items-center gap-3">
+                            <div className="hidden sm:flex items-center gap-2">
+                                {session.user?.image ? (
+                                    <img 
+                                        src={session.user.image} 
+                                        alt="Profile" 
+                                        className="w-8 h-8 rounded-full"
+                                    />
+                                ) : (
+                                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <User size={16} />
+                                    </div>
+                                )}
+                              
+                            </div>
+                            
+                            {/* Logout button */}
+                            <Button 
+                                onClick={handleSignOut}
+                                size="sm" 
+                                variant="destructive"
+                                className='rounded-full px-4 flex items-center gap-2'
+                            >
+                                <LogOut size={16} />
+                                <span className="hidden sm:inline">Logout</span>
+                            </Button>
+                        </div>
+                    ) : (
+                        // Not logged in state
+                        <Link href="/signin">
+                            <Button size="sm" className='bg-primary text-white rounded-full px-4 hover:bg-primary/90'>
+                                Sign In
+                            </Button>
+                        </Link>
+                    )}
                     <MobileNav />
                 </div>
             </div>

@@ -4,10 +4,12 @@ import HowItWorks from '@/components/shared/HowItWorks'
 import Hero from '@/components/shared/Hero'
 import CallToAction from '@/components/shared/CallToAction'
 import Footer from '@/components/shared/Footer'
+import Header from '@/components/shared/Navbar'
 
 const Home = () => {
   return (
     <main>
+      <Header/>
       {/* Hero Section */}
       <Hero />
 
