@@ -54,6 +54,10 @@ export interface User {
     groups?: Group[];
     createdAt?: Date;
     updatedAt?: Date;
+    primaryColor: string;
+    secondaryColor: string;
+    textColor1: string;
+    textColor2: string;
   }
   
   export interface Round {
@@ -62,6 +66,7 @@ export interface User {
     tournamentId: string;
     tournament?: Tournament;
     matches?: Match[];
+    numberOfMatches: number;
   }
   
   export interface Match {
@@ -110,3 +115,19 @@ export interface User {
     matches?: Match[];
   }
   
+
+  export type TournamentCreateInput = {
+    name: string;
+    logo: string;
+    primaryColor: string;
+    secondaryColor: string;
+    textColor1: string;
+    textColor2: string;
+  };
+
+  export type RoundCreateInput = {
+    id?: string;
+    name: string;
+    tournamentId: string;
+    numberOfMatches: number;
+  };

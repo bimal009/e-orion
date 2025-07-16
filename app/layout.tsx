@@ -5,6 +5,7 @@ import "./globals.css";
 
 import SessionWrapper from "@/lib/providers/SessionWrapper";
 import Providers from "@/lib/providers/QueryProviders";
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -29,13 +30,14 @@ export default function RootLayout({
         className={`${roboto.variable} ${roboto.className} antialiased mx-auto bg-gradient-to-b from-primary/20 to-background`}
         suppressHydrationWarning={true}
       >
-        
+        <NuqsAdapter>
         <SessionWrapper>
           <Providers>
 
           {children}
           </Providers>
         </SessionWrapper>
+        </NuqsAdapter>
       </body>
     </html>
   );

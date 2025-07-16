@@ -6,10 +6,11 @@ import Navitems from './Navitems'
 import MobileNav from './Mobilenav'
 import { Button } from '../ui/button'
 import { LogOut, User } from 'lucide-react'
+import Image from 'next/image'
 
 const Header = () => {
     const { data: session, status } = useSession()
-console.log(session)
+console.log(session?.user.image)
     const handleSignOut = () => {
         signOut({
             callbackUrl: '/' 
@@ -42,10 +43,12 @@ console.log(session)
                         <div className="flex items-center gap-3">
                             <div className="hidden sm:flex items-center gap-2">
                                 {session.user?.image ? (
-                                    <img 
+                                    <Image 
                                         src={session.user.image} 
                                         alt="Profile" 
-                                        className="w-8 h-8 rounded-full"
+                                        className="w-8 h-8 rounded-full object-cover"
+                                        width={32}
+                                        height={32}
                                     />
                                 ) : (
                                     <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
@@ -59,8 +62,8 @@ console.log(session)
                             <Button 
                                 onClick={handleSignOut}
                                 size="sm" 
-                                variant="destructive"
-                                className='rounded-full px-4 flex items-center gap-2'
+                                variant="outline"
+                                className='rounded-full px-4 flex items-center gap-2 bg-transparent border-none text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300  '
                             >
                                 <LogOut size={16} />
                                 <span className="hidden sm:inline">Logout</span>

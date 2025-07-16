@@ -1,8 +1,8 @@
 "use client"
 
-import { Tournament } from "@/lib/types"
+import { Tournament, TournamentCreateInput } from "@/lib/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createTournment, deleteTournament, getTournaments } from "../actions/dashboard.action"
+import { createTournment, deleteTournament, getTournaments, getTournamentsWithSearch, updateTournment } from "../actions/dashboard.action"
 import { toast } from "sonner"
 
 
@@ -12,16 +12,37 @@ export const UseGetTournments = () => {
         queryFn: getTournaments,
     })
 }
+export const UseGetTournmentsBySearch = (search: string) => {
+  return useQuery({
+      queryKey: ["tournments", search],
+      queryFn: () => getTournamentsWithSearch(search),
+  })
+}
 
 export const useCreateTournaments = () => {
     const queryClient = useQueryClient()
   
     return useMutation({
-      mutationFn: (data: Tournament) => createTournment(data),
+      mutationFn: (data: TournamentCreateInput) => createTournment(data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["tournments"] })
       },
-      onError: (error) => {
+      onError: (error: any) => {
+        console.error("Error creating tournament:", error)
+      },
+    })
+  }
+
+
+  export const useUpdateTournaments = () => {
+    const queryClient = useQueryClient()
+  
+    return useMutation({
+      mutationFn: (data: Tournament) => updateTournment(data.id || "", data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["tournments"] })
+      },
+      onError: (error: any) => {
         console.error("Error creating tournament:", error)
       },
     })

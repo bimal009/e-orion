@@ -58,11 +58,14 @@ model Tournament {
   logo      String
   ownerId   String   @db.ObjectId
   owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  rounds    Round[]
+  rounds    Round[] @relation("TournamentRounds")
   groups    Group[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  primaryColor String
+  secondaryColor String
+  textColor1 String
+  textColor2 String
   @@map("tournaments")
 }
 
@@ -70,8 +73,9 @@ model Round {
   id           String     @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   tournamentId String     @db.ObjectId
-  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournament   Tournament @relation("TournamentRounds", fields: [tournamentId], references: [id], onDelete: Cascade)
   matches      Match[]
+  numberOfMatches Int
 
   @@map("rounds")
 }

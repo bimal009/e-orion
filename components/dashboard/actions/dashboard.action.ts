@@ -2,11 +2,14 @@
 
 import { authOptions } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { Tournament } from "@/lib/types"
+import {  TournamentCreateInput } from "@/lib/types"
 import { handleError } from "@/lib/utils"
 import { getServerSession } from "next-auth"
 
-export const createTournment = async (data: Tournament) => {
+
+
+
+export const createTournment = async (data: TournamentCreateInput & { ownerId?: string }) => {
   try {
     const session = await getServerSession(authOptions)
 
@@ -19,13 +22,43 @@ export const createTournment = async (data: Tournament) => {
         name: data.name,
         logo: data.logo || "",
         ownerId: session.user.id,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        textColor1: data.textColor1,
+        textColor2: data.textColor2,
       },
     })
-console.log(tournament)
+    console.log(tournament)
     return tournament
   } catch (error) {
     handleError(error)
     throw new Error("Failed to create tournament")
+  }
+}
+
+  export const updateTournment = async (id: string, data: TournamentCreateInput) => {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      throw new Error("User not authenticated")
+    }
+
+    const tournament = await prisma.tournament.update({
+      where: { id },
+      data: {
+        name: data.name,
+        logo: data.logo,
+        primaryColor: data.primaryColor,
+        secondaryColor: data.secondaryColor,
+        textColor1: data.textColor1,
+        textColor2: data.textColor2,
+      },
+    })
+    return tournament
+  } catch (error) {
+    handleError(error)
+    throw new Error("Failed to update tournament")
   }
 }
 
@@ -43,13 +76,44 @@ export const getTournaments = async () => {
           id: session.user.id,
         },
         include: {
-          tournaments: true, // assumes relation field in Prisma schema is called `tournaments`
+          tournaments: {
+            include: {
+              rounds: true,
+            },
+          },
         },
       })
   
       console.log(userWithTournaments?.tournaments)
   
       return userWithTournaments?.tournaments || []
+    } catch (error) {
+      handleError(error)
+      throw new Error("Failed to fetch tournaments")
+    }
+  }
+
+  export const getTournamentsWithSearch = async (search: string) => {
+    try {
+      const session = await getServerSession(authOptions)
+  
+      if (!session?.user?.id) {
+        throw new Error("User not authenticated")
+      }
+  
+      const tournaments = await prisma.tournament.findMany({
+        where: {
+          name: {
+            contains: search,
+            mode: 'insensitive',
+          },
+          ownerId: session.user.id,
+        },
+      })
+  
+      console.log(tournaments)
+  
+      return tournaments || []
     } catch (error) {
       handleError(error)
       throw new Error("Failed to fetch tournaments")
@@ -76,6 +140,9 @@ export const getTournaments = async () => {
   
       const deletedTournament = await prisma.tournament.delete({
         where: { id },
+        include: {
+          rounds: true,
+        },
       })
   
       return deletedTournament
