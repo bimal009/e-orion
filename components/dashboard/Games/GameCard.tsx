@@ -1,17 +1,19 @@
-import Image from 'next/image'
-import { Trophy, Calendar, Users, MoreVertical, CircleAlert, CircleDot, Edit3, Trash2 } from 'lucide-react'
-import { Round } from '@/lib/types'
+import { Trophy, Calendar, MoreVertical, Edit3, Trash2, Map as MapIcon, Users, Clock, PlayCircle } from 'lucide-react'
+import { Group, Map,   Match } from '@/lib/types'
 import {  useRouter } from 'next/navigation'
 import React, { useState, useRef } from 'react'
-import { useDeleteRound } from '../api/useRound'
+import { useDeleteGame } from '../api/useGames'
+import { Button } from '@/components/ui/button'
 
 interface GameCardProps {
-  round: Round
-  onEdit?: (round: Round) => void
+  game: Match
+  onEdit?: (game: Match) => void
+  groups: Group[]
+  maps: Map[]
 }
 
-const GameCard = ({ round, onEdit }: GameCardProps) => {
-    const { mutate, isPending } = useDeleteRound()
+const GameCard = ({ game, onEdit, groups = [], maps = [] }: GameCardProps) => {
+    const { mutate, isPending } = useDeleteGame()
     const handleDelete = (id: string) => {
         mutate(id)
     }
@@ -38,7 +40,7 @@ const GameCard = ({ round, onEdit }: GameCardProps) => {
     return (
       <div
         className="group bg-muted border border-border hover:border-primary hover:scale-[1.02] duration-300 transition-all rounded-2xl shadow-lg hover:shadow-2xl p-6 relative cursor-pointer overflow-hidden"
-        onClick={() => router.push(`/dashboard/tournment/${round.tournamentId}/matches`)}
+        onClick={() => router.push(`/live/${game.id}`)}
       >
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -53,9 +55,9 @@ const GameCard = ({ round, onEdit }: GameCardProps) => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-lg text-foreground truncate group-hover:text-primary transition-colors">
-                  {round.name}
+                  {game.name}
                 </h3>
-                <p className="text-sm text-muted-foreground">Game Round</p>
+                <p className="text-sm text-muted-foreground">Game #{game.matchNo}</p>
               </div>
             </div>
 
@@ -68,14 +70,14 @@ const GameCard = ({ round, onEdit }: GameCardProps) => {
                 <div ref={menuRef} className="absolute right-0 mt-2 w-40 bg-popover backdrop-blur-sm border border-border rounded-xl shadow-xl py-2 z-50">
                   <button
                     className="flex items-center w-full text-left px-4 py-3 text-sm hover:bg-accent text-foreground transition-colors rounded-lg mx-1"
-                    onClick={e => { e.stopPropagation(); setMenuOpen(false); onEdit && onEdit(round); }}
+                    onClick={e => { e.stopPropagation(); setMenuOpen(false); onEdit && onEdit(game); }}
                   >
                     <Edit3 size={16} className="mr-3" />
                     Edit
                   </button>
                   <button
                     className="flex items-center w-full text-left px-4 py-3 text-sm hover:bg-destructive/10 text-destructive transition-colors rounded-lg mx-1"
-                    onClick={e => { e.stopPropagation(); setMenuOpen(false); round.id && handleDelete(round.id); }}
+                    onClick={e => { e.stopPropagation(); setMenuOpen(false); game.id && handleDelete(game.id); }}
                     disabled={isPending}
                   >
                     <Trash2 size={16} className="mr-3" />
@@ -96,12 +98,51 @@ const GameCard = ({ round, onEdit }: GameCardProps) => {
             <div className="flex items-center justify-between p-3 bg-accent rounded-xl border border-border">
               <div className="flex items-center space-x-2">
                 <Calendar className="text-primary w-5 h-5" />
-                <span className="font-medium text-sm text-foreground">Duration</span>
+                <span className="font-medium text-sm text-foreground">Start Time</span>
               </div>
-              <span className="font-bold text-primary text-lg">
-                {round.numberOfDays || 0} Days
+              <span className="font-semibold text-xs text-primary">
+                {game.startTime ? new Date(game.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
               </span>
             </div>
+            <div className="flex items-center justify-between p-3 bg-accent rounded-xl border border-border">
+              <div className="flex items-center space-x-2">
+                <Clock className="text-primary w-5 h-5" />
+                <span className="font-medium text-sm text-foreground">End Time</span>
+              </div>
+              <span className="font-semibold text-xs text-primary">
+                {game.endTime ? new Date(game.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-accent rounded-xl border border-border">
+              <div className="flex items-center space-x-2">
+                <MapIcon className="text-primary w-5 h-5" />
+                <span className="font-medium text-sm text-foreground">Map</span>
+              </div>
+              <span className="font-semibold text-xs text-primary">
+                {maps?.find(map => map.id === game.mapId)?.name || 'N/A'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-accent rounded-xl border border-border">
+              <div className="flex items-center space-x-2">
+                <Trophy className="text-primary w-5 h-5" />
+                <span className="font-medium text-sm text-foreground">Group</span>
+              </div>
+              <span className="font-semibold text-xs text-primary">
+                {groups?.find(group => group.id === game.groupId)?.name || 'N/A'}
+              </span>
+            </div>
+          </div>
+
+          {/* Go Live Button */}
+          <div className="mt-6 py-3 flex justify-end">
+            <Button
+              variant="default"
+              size="lg"
+              className="rounded-full px-6 flex items-center gap-2"
+              onClick={e => { e.stopPropagation(); router.push(`/live/${game.id}`) }}
+            >
+              <PlayCircle className="w-5 h-5 mr-2" /> Go Live
+            </Button>
           </div>
 
           {/* Hover Effect */}

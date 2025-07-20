@@ -15,3 +15,18 @@ export const getMaps=async()=>{
         throw new Error("Failed to get maps")
     }
 }
+
+export const getMapById=async(id:string)=>{
+    try {
+        const map=await prisma.map.findUnique({
+            where:{id},
+            include:{
+                matches:true
+            }
+        })
+        return map
+    } catch (error) {
+        handleError(error)
+        throw new Error("Failed to get map")
+    }
+}

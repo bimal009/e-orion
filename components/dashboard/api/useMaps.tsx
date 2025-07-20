@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { getMaps } from "../actions/map.actions"
+import { getMapById, getMaps } from "../actions/map.actions"
 
 export const useGetMaps = () => {
     return useQuery({
@@ -12,3 +12,15 @@ export const useGetMaps = () => {
         refetchOnMount: true,
     })
 }
+
+
+export const useGetMapById = (id:string) => {
+    return useQuery({
+        queryKey: ["maps", id],
+        queryFn: () => getMapById(id),
+        staleTime: 30 * 1000,
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+    })
+}
+

@@ -23,7 +23,7 @@ import { getServerSession } from "next-auth"
         mapId: data.mapId,
         startTime: data.startTime,
         endTime: data.endTime || null,
-        ...(data.groupId && { groupId: data.groupId })
+        ...(data.groupId && { groupId: data.groupId }),
       }
     })
     console.log(team)
@@ -53,6 +53,13 @@ export const updateGame = async (id: string, data: GameCreateInput) => {
     const updateData: any = {
       name: data.name,
       tournamentId: data.tournamentId,
+      roundId: data.roundId,
+      matchNo: data.matchNo,
+      mapId: data.mapId,
+      startTime: data.startTime,
+      endTime: data.endTime || null,
+      ...(data.groupId && { groupId: data.groupId }),
+
     };
     if (data.groupId !== undefined) updateData.groupId = data.groupId;
     if (data.roundId !== undefined) updateData.roundId = data.roundId;

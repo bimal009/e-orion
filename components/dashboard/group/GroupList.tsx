@@ -16,7 +16,7 @@ const GroupList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) =>
   console.log(tournmentId,roundId,"tournmentId,roundId from group list")
   const [search] = useQueryState('search')
   const router = useRouter()
-  const { data, isPending } = useGetGroupsByRoundId(tournmentId,roundId)
+  const { data, isPending } = useGetGroupsByRoundId(roundId)
   console.log(data, "data from group list")
   const { data: data2 } = useGetGroupsBySearch(tournmentId, search || "")
   const [formOpen, setFormOpen] = useState(false)

@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 const dummyTeams = [
   {
     name: "Crimson Hawks",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?hawk",
     teamTag: "CHW",
     email: "contact@crimsonhawks.gg",
@@ -43,7 +43,7 @@ const dummyTeams = [
   },
   {
     name: "Azure Eagles",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?eagle",
     teamTag: "AEG",
     email: "contact@azureeagles.gg",
@@ -79,7 +79,7 @@ const dummyTeams = [
   },
   {
     name: "Golden Lions",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?lion",
     teamTag: "GLI",
     email: "contact@goldenlions.gg",
@@ -115,7 +115,7 @@ const dummyTeams = [
   },
   {
     name: "Emerald Tigers",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?tiger",
     teamTag: "ETI",
     email: "contact@emeraldtigers.gg",
@@ -151,7 +151,7 @@ const dummyTeams = [
   },
   {
     name: "Sapphire Wolves",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?wolf",
     teamTag: "SWO",
     email: "contact@sapphirewolves.gg",
@@ -187,7 +187,7 @@ const dummyTeams = [
   },
   {
     name: "Ruby Bears",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?bear",
     teamTag: "RBE",
     email: "contact@rubybears.gg",
@@ -223,7 +223,7 @@ const dummyTeams = [
   },
   {
     name: "Diamond Sharks",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?shark",
     teamTag: "DSH",
     email: "contact@diamondsharks.gg",
@@ -259,7 +259,7 @@ const dummyTeams = [
   },
   {
     name: "Platinum Dragons",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?dragon",
     teamTag: "PDR",
     email: "contact@platinumdragons.gg",
@@ -295,7 +295,7 @@ const dummyTeams = [
   },
   {
     name: "Silver Phoenixes",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?phoenix",
     teamTag: "SPH",
     email: "contact@silverphoenixes.gg",
@@ -331,7 +331,7 @@ const dummyTeams = [
   },
   {
     name: "Bronze Falcons",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?falcon",
     teamTag: "BFA",
     email: "contact@bronzefalcons.gg",
@@ -367,7 +367,7 @@ const dummyTeams = [
   },
   {
     name: "Obsidian Panthers",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?panther",
     teamTag: "OPA",
     email: "contact@obsidianpanthers.gg",
@@ -403,7 +403,7 @@ const dummyTeams = [
   },
   {
     name: "Jade Jaguars",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?jaguar",
     teamTag: "JJA",
     email: "contact@jadejaguars.gg",
@@ -439,7 +439,7 @@ const dummyTeams = [
   },
   {
     name: "Topaz Leopards",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?leopard",
     teamTag: "TLE",
     email: "contact@topazleopards.gg",
@@ -475,7 +475,7 @@ const dummyTeams = [
   },
   {
     name: "Amber Cheetahs",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?cheetah",
     teamTag: "ACH",
     email: "contact@ambercheetahs.gg",
@@ -511,7 +511,7 @@ const dummyTeams = [
   },
   {
     name: "Onyx Pumas",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?puma",
     teamTag: "OPU",
     email: "contact@onyxpumas.gg",
@@ -547,7 +547,7 @@ const dummyTeams = [
   },
   {
     name: "Ivory Cobras",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?cobra",
     teamTag: "ICO",
     email: "contact@ivorycobras.gg",
@@ -583,7 +583,7 @@ const dummyTeams = [
   },
   {
     name: "Scarlet Vipers",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?viper",
     teamTag: "SVI",
     email: "contact@scarletvipers.gg",
@@ -619,7 +619,7 @@ const dummyTeams = [
   },
   {
     name: "Violet Scorpions",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?scorpion",
     teamTag: "VSC",
     email: "contact@violetscorpions.gg",
@@ -655,7 +655,7 @@ const dummyTeams = [
   },
   {
     name: "Indigo Raptors",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?raptor",
     teamTag: "IRA",
     email: "contact@indigoraptors.gg",
@@ -691,7 +691,7 @@ const dummyTeams = [
   },
   {
     name: "Magenta Hornets",
-    tournamentId: "687a5e3e1fb189b08cfb5b3f",
+    tournamentId: "687d23940670f4d304279292",
     logo: "https://source.unsplash.com/random/200x200?hornet",
     teamTag: "MHO",
     email: "contact@magentahornets.gg",

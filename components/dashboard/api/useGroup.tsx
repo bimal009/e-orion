@@ -39,12 +39,12 @@ export const useGetGroups = (tournamentId: string) => {
     })
 }
 
-export const useGetGroupsByRoundId = (tournamentId: string, roundId: string) => {
+export const useGetGroupsByRoundId = ( roundId: string) => {
 
     return useQuery({
-        queryKey: ["groups", "round", tournamentId, roundId],
-        queryFn: () => getGroupsByRoundId(tournamentId, roundId),
-        enabled: !!tournamentId && !!roundId,
+        queryKey: ["groups", "round", roundId],
+        queryFn: () => getGroupsByRoundId( roundId),
+        enabled: !!roundId,
         staleTime: 30 * 1000,
         refetchOnWindowFocus: true,
         refetchOnMount: true,
@@ -77,20 +77,12 @@ export const useCreateGroup = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (data: GroupCreateInput) => createGroup(data),
-        onSuccess: (newGroup, variables) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["groups"] })
             queryClient.invalidateQueries({ queryKey: ["tournaments"] })
             queryClient.invalidateQueries({ queryKey: ["teams"] })
             queryClient.invalidateQueries({ queryKey: ["matches"] })
-            queryClient.setQueryData(
-                ["groups", variables.tournamentId],
-                (oldData: any[] | undefined) => {
-                    if (oldData) {
-                        return [...oldData, newGroup]
-                    }
-                    return [newGroup]
-                }
-            )
+           
         },
         onError: (error: any) => {
             console.error("Error creating group:", error)
@@ -103,22 +95,12 @@ export const useUpdateGroup = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (data: GroupCreateInput) => updateGroup(data.id || "", data),
-        onSuccess: (updatedGroup, variables) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["groups"] })
             queryClient.invalidateQueries({ queryKey: ["tournaments"] })
             queryClient.invalidateQueries({ queryKey: ["teams"] })
             queryClient.invalidateQueries({ queryKey: ["matches"] })
-            queryClient.setQueryData(
-                ["groups", variables.tournamentId],
-                (oldData: any[] | undefined) => {
-                    if (oldData) {
-                        return oldData.map((group: any) =>
-                            group.id === updatedGroup.id ? updatedGroup : group
-                        )
-                    }
-                    return oldData
-                }
-            )
+      
         },
         onError: (error: any) => {
             console.error("Error updating group:", error)

@@ -241,14 +241,14 @@ export const getGroupById = async (id: string) => {
   }
 }
 
-export const getGroupsByRoundId = async (tournamentId: string, roundId: string) => {
+export const getGroupsByRoundId = async (roundId: string) => {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       throw new Error("User not authenticated")
     }
     const groups = await prisma.group.findMany({
-      where: { tournamentId, roundId },
+      where: { roundId },
       include: {
         tournament: true,
         teams: { include: { players: true } },

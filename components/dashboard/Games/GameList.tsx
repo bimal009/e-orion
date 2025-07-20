@@ -1,7 +1,7 @@
 "use client"
 import { Trophy, ArrowLeft } from 'lucide-react'
 import TournamentButton from './GameButton'
-import { Round } from '@/lib/types'
+import { Match } from '@/lib/types'
 import { useState } from 'react'
 import { useQueryState } from 'nuqs'
 import SearchButton from '../tournments/SearchButton'
@@ -14,32 +14,37 @@ import { useRouter } from 'next/navigation'
 import { FullScreenLoader } from '@/components/shared/Loader'
 import { useGetTeams } from '../api/useTeams'
 import { useGetGames } from '../api/useGames'
+import { useGetGroupsByRoundId } from '../api/useGroup'
+import { useGetMaps } from '../api/useMaps'
 
 const GameList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) => {
   const [search] = useQueryState('search')
   const router = useRouter()
-  const { data, isPending } = useGetGames(tournmentId,roundId  )
-  const { data: data2 } = useGetRoundsBySearch(tournmentId, search || "")
+  const { data: games, isPending: isGamesPending } = useGetGames(tournmentId, roundId)
+  const tournamentIdForGroups = games?.[0]?.tournamentId;
+  const { data: groups, isPending: isGroupsPending } = useGetGroupsByRoundId(roundId);
+  console.log(groups, "groups")
   const [formOpen, setFormOpen] = useState(false)
   const [formType, setFormType] = useState<'create' | 'edit'>('create')
-  const [editRound, setEditRound] = useState<Round | null>(null)
-
-  const handleEdit = (round: Round) => {
-    setEditRound(round)
+  const [editGame, setEditGame] = useState<Match | null>(null)
+  const { data: maps , isPending: isMapsPending } = useGetMaps()
+  const handleEdit = (game: Match) => {
+    setEditGame(game)
     setFormType('edit')
     setFormOpen(true)
   }
 
   const handleCreate = () => {
-    setEditRound(null)
+    setEditGame(null)
     setFormType('create')
     setFormOpen(true)
     console.log(formOpen)
   }
 
-  const rounds = search ? data2 : data;
+  const gameList = games;
 
-  if (isPending) {
+  const isLoading = isGamesPending || isMapsPending || (!!tournamentIdForGroups && isGroupsPending);
+  if (isLoading) {
     return (
       <FullScreenLoader />
     )
@@ -73,12 +78,12 @@ const GameList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) => 
         opened={formOpen}
         onClose={() => setFormOpen(false)}
         type={formType}
-        initialData={editRound}
+        initialData={editGame}
         tournmentId={tournmentId}
         roundId={roundId}
       />
       
-      { !rounds || rounds.length === 0 ? (
+      { !gameList || gameList.length === 0 ? (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-primary rounded-full flex items-center justify-center mb-4">
             <Trophy className="w-12 h-12 text-primary-foreground" />
@@ -89,9 +94,9 @@ const GameList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) => 
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rounds?.map((round:Round) => (
-              <GameCard key={round.id?.toString()} round={round}  onEdit={handleEdit} />
-          ))}
+           {gameList?.map((game: Match) => (
+                <GameCard key={game.id?.toString()} game={game} groups={(groups || []).map(g => ({ ...g, round: g.round ?? undefined }))} maps={maps || []} onEdit={handleEdit} />
+            ))}
         </div>
       )}
     </div>

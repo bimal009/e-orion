@@ -25,7 +25,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from 'sonner'
 import { useCreateRound, useUpdateRound } from '../api/useRound'  
 import { useGetMaps } from '../api/useMaps'
-import { useGetGroups } from '../api/useGroup'
+import { useGetGroupsByRoundId } from '../api/useGroup'
 import { useCreateGame, useUpdateGame } from '../api/useGames'
 
 // Zod validation schema
@@ -37,6 +37,19 @@ function timeStringToDate(time: string): Date {
   const now = new Date();
   now.setHours(hours, minutes, 0, 0);
   return now;
+}
+
+// Helper to convert any value to 'HH:mm' string
+function toTimeString(val: any): string {
+  if (!val) return '';
+  if (typeof val === 'string') return val.slice(0, 5);
+  if (val instanceof Date) {
+    return val.toTimeString().slice(0, 5);
+  }
+  if (typeof val === 'number') {
+    return new Date(val).toTimeString().slice(0, 5);
+  }
+  return '';
 }
 
 const gameSchema = z.object({
@@ -70,8 +83,8 @@ const gameSchema = z.object({
     
   groupId: z
     .string()
-    .optional(),
-    
+    .min(1, 'Please select a group'),
+
 
 })
 
@@ -99,8 +112,8 @@ const GameForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Fetch data using hooks
-  const { data: mapsData } = useGetMaps()
-  const { data: groupsData } = useGetGroups(tournmentId)
+  const { data: mapsData , isPending: isMapsPending } = useGetMaps()
+  const { data: groupsData , isPending: isGroupsPending } = useGetGroupsByRoundId(roundId)
   const { mutate, isPending } = type === 'edit' ? useUpdateGame() : useCreateGame()
 
   const {
@@ -128,8 +141,8 @@ const GameForm = ({
     if (initialData) {
       const formattedData = {
         ...initialData,
-        startTime: initialData.startTime ? initialData.startTime.slice(0, 5) : '',
-        endTime: initialData.endTime ? initialData.endTime.slice(0, 5) : '',
+        startTime: toTimeString(initialData.startTime),
+        endTime: toTimeString(initialData.endTime),
       }
       reset(formattedData)
     } else {
@@ -268,16 +281,15 @@ const GameForm = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="groupId" className="text-foreground">Group (Optional)</Label>
+                <Label htmlFor="groupId" className="text-foreground">Group</Label>
                 <Select
-                  value={watch('groupId') || 'no-group'}
-                  onValueChange={(value) => setValue('groupId', value === 'no-group' ? '' : value, { shouldValidate: true })}
+                  value={watch('groupId') || ''}
+                  onValueChange={(value) => setValue('groupId', value, { shouldValidate: true })}
                 >
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Select a group" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="no-group">No Group</SelectItem>
                     {groups.map((group) => (
                       <SelectItem key={group.id} value={group.id}>
                         {group.name}
@@ -343,10 +355,10 @@ const GameForm = ({
             </Button>
             <Button
               type="submit"
-              disabled={!isValid || isSubmitting || isPending}
+                disabled={!isValid || isSubmitting || isMapsPending || isGroupsPending}
               className="flex-1 sm:flex-none sm:max-w-xs order-1 sm:order-2"
             >
-              {isSubmitting || isPending ? (
+              {isSubmitting || isMapsPending || isGroupsPending ? (
                 <>
                   <span className="animate-spin mr-2">↻</span>
                   {type === 'edit' ? 'Updating...' : 'Creating...'}
