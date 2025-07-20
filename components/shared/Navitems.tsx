@@ -8,7 +8,7 @@ const Navigations = [
     },
     {
         label: 'Live Now',
-        href: '/dashboard',
+        href: '/live',
     },
     {
         label: 'About Us',
@@ -25,7 +25,7 @@ const Navitems = () => {
         <ul className='flex flex-col md:flex-row md:items-center md:gap-8 gap-6 px-4'>
             {Navigations.map((item) => (
                 <li key={item.href}>
-                    <Link href={item.href} className="hover:text-primary transition-colors">
+                    <Link href={item.href} className="hover:text-primary text-foreground transition-colors">
                         {item.label}
                     </Link>
                 </li>

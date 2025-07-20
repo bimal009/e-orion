@@ -33,14 +33,14 @@ const MobileNav = () => {
     return (
         <div className='md:hidden'>
             <Sheet>
-                <SheetTrigger className="flex items-center justify-center p-2 rounded-md hover:bg-accent" aria-label="Menu">
+                <SheetTrigger className="flex items-center justify-center p-2 rounded-md hover:bg-accent text-foreground" aria-label="Menu">
                     <Menu size={24} />
                 </SheetTrigger>
-                <SheetContent side="left" className="flex flex-col">
+                <SheetContent side="left" className="flex flex-col bg-background border-border">
                     <SheetHeader className="mb-6">
-                        <SheetTitle>
+                        <SheetTitle className="text-foreground">
                             <Link href="/" className='flex items-center gap-2'>
-                                <p className='text-xl font-bold'>E-ORION</p>
+                                <p className='text-xl font-bold text-foreground'>E-ORION</p>
                             </Link>
                         </SheetTitle>
                     </SheetHeader>

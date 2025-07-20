@@ -27,8 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${roboto.variable} ${roboto.className} antialiased mx-auto bg-gradient-to-b from-primary/20 to-background`}
-        suppressHydrationWarning={true}
+        className={`${roboto.variable} ${roboto.className} antialiased mx-auto bg-background`}
       >
         <NuqsAdapter>
         <SessionWrapper>

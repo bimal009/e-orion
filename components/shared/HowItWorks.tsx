@@ -29,7 +29,7 @@ const HowItWorks = () => {
         <section className="py-16 md:py-24">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <p className="inline-block text-sm font-medium bg-primary/10 text-secondary-foreground px-4 py-1.5 rounded-full mb-6">
+                    <p className="inline-block text-sm font-medium bg-primary/10 text-primary px-4 py-1.5 rounded-full mb-6">
                         How E-ORION Works
                     </p>
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">

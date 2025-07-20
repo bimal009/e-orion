@@ -4,19 +4,15 @@ import Link from 'next/link';
 
 const CallToAction = () => {
     return (
-        <section className="py-16 md:py-24">
+        <section className="py-16 md:py-24 bg-background">
             <div className="container mx-auto px-4">
-                <div className="bg-gradient-to-br from-primary/5 to-blue-500/5 rounded-3xl p-8 md:p-12 lg:p-16 text-center relative overflow-hidden">
-                    {/* Background Effects */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent rounded-3xl"></div>
-                    <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full bg-primary/10 blur-2xl"></div>
-                    <div className="absolute bottom-1/4 left-1/4 w-24 h-24 rounded-full bg-blue-500/10 blur-xl"></div>
+                <div className="rounded-3xl p-8 md:p-12 lg:p-16 text-center relative overflow-hidden bg-muted">
                     
                     <div className="relative z-10">
-                        <p className="inline-block text-sm font-medium bg-primary/10 text-secondary-foreground px-4 py-1.5 rounded-full mb-6">
+                        <p className="inline-block text-sm font-medium bg-primary/10 text-primary px-4 py-1.5 rounded-full mb-6">
                             Ready to Go Live?
                         </p>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-foreground">
                             Power Your Next <span className="text-primary">Esports Event</span>
                         </h2>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">

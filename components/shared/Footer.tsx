@@ -41,15 +41,15 @@ const Footer = () => {
     ]
 
     return (
-        <footer className="backdrop-blur border-t border-border/40 mt-16">
+        <footer className="backdrop-blur border-t border-border/40 mt-16 bg-background">
             <div className="container mx-auto px-4 py-12 lg:py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-8">
                     <div className="lg:col-span-2">
                         <Link href="/" className="flex items-center gap-2 mb-6">
                             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">EO</span>
+                                <span className="text-primary-foreground font-bold text-sm">EO</span>
                             </div>
-                            <span className="text-xl font-bold">E-ORION</span>
+                            <span className="text-xl font-bold text-foreground">E-ORION</span>
                         </Link>
                         <p className="text-sm text-muted-foreground mb-6 max-w-md leading-relaxed">
                             E-ORION empowers esports organizers with live match insights, team stats, and stunning broadcast overlays — all in one powerful production suite.
@@ -61,7 +61,7 @@ const Footer = () => {
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="h-9 w-9 flex items-center justify-center rounded-lg bg-muted hover:bg-primary hover:text-white transition-all duration-200"
+                                    className="h-9 w-9 flex items-center justify-center rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-all duration-200"
                                     aria-label={social.label}
                                 >
                                     {social.icon}
@@ -72,7 +72,7 @@ const Footer = () => {
 
                     {footerLinks.map((section, index) => (
                         <div key={index}>
-                            <h3 className="font-semibold text-base mb-4">{section.title}</h3>
+                            <h3 className="font-semibold text-base mb-4 text-foreground">{section.title}</h3>
                             <ul className="space-y-3">
                                 {section.links.map((link, linkIndex) => (
                                     <li key={linkIndex}>

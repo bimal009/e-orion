@@ -26,14 +26,14 @@ const Features = () => {
     ];
 
     return (
-        <section className="py-16 md:py-24 relative overflow-hidden">
+        <section className="py-16 md:py-24 relative overflow-hidden bg-background">
             <div className="container mx-auto px-4 relative z-10">
                 {/* Header Section */}
                 <div className="text-center mb-16">
-                    <p className="inline-block text-sm font-medium bg-primary/10 text-secondary-foreground px-4 py-1.5 rounded-full mb-6">
+                    <p className="inline-block text-sm font-medium bg-primary/10 text-primary px-4 py-1.5 rounded-full mb-6">
                         Why Choose E-ORION
                     </p>
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6 text-foreground">
                         Features Built for <span className="text-primary">Champions</span>
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -46,14 +46,14 @@ const Features = () => {
                     {features.map((feature, index) => (
                         <div 
                             key={index} 
-                            className="group relative p-6 lg:p-8 rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-300 flex flex-col items-center text-center hover:-translate-y-1 hover:shadow-lg"
+                            className="group relative p-6 lg:p-8 rounded-2xl border border-border/50 bg-muted/50 backdrop-blur-sm hover:bg-muted/80 transition-all duration-300 flex flex-col items-center text-center hover:-translate-y-1 hover:shadow-lg"
                         >
                             {/* Icon Container */}
                             <div className="relative mb-4 p-3 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
                                 {feature.icon}
                             </div>
                             
-                            <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
+                            <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors text-foreground">
                                 {feature.title}
                             </h3>
                             <p className="text-muted-foreground leading-relaxed text-sm">
