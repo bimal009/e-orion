@@ -65,7 +65,7 @@ const GroupList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) =>
           </div>
         </div>
         <div className="w-full sm:w-auto">
-          <GroupButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />
+          <GroupButton roundId={roundId} type={formType} onClick={handleCreate} tournmentId={tournmentId} />
         </div>
       </div>
       <GroupForm
@@ -84,7 +84,7 @@ const GroupList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) =>
           </div>
           <h3 className="text-lg font-medium text-primary mb-2">No Groups yet</h3>
           <p className="text-muted-foreground mb-6">Get started by creating your first Groups</p>
-          <GroupButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />
+          <GroupButton roundId={roundId} type={formType} onClick={handleCreate} tournmentId={tournmentId} />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

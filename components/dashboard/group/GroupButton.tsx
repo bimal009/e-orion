@@ -8,9 +8,10 @@ type ButtonProps = {
   type: 'edit' | 'create' // Only allow valid types
   onClick?: () => void
   tournmentId: string
+  roundId: string
 }
 
-const GroupButton = ({ type, onClick, tournmentId }: ButtonProps) => {
+const GroupButton = ({ type, onClick, tournmentId, roundId }: ButtonProps) => {
   const [opened, setOpened] = useState(false)
 
   return (
@@ -21,6 +22,7 @@ const GroupButton = ({ type, onClick, tournmentId }: ButtonProps) => {
 
       {!onClick && (
         <GroupForm
+          roundId={roundId}
           opened={opened}
           onClose={() => setOpened(false)}
           type={type}

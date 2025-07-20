@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import GameForm from './GameForm'
 
 type ButtonProps = {
-  type: 'edit' | 'create' // Only allow valid types
+  type: 'edit' | 'create' 
   onClick?: () => void
   tournmentId: string
 }
