@@ -49,7 +49,7 @@ const HowItWorks = () => {
                         {steps.map((step, index) => (
                             <div key={index} className="flex flex-col items-center text-center group">
                                 <div className="relative mb-6">
-                                    <div className="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
+                                    <div className="w-16 h-16 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
                                         {step.icon}
                                     </div>
                                     <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-primary/20 rounded-2xl blur-xl group-hover:bg-primary/30 transition-all"></div>

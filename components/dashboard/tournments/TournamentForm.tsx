@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from 'sonner'
-import { useCreateTournaments, useUpdateTournaments } from '../api/UseTournment'
+import { useCreateTournament, useUpdateTournament } from '../api/UseTournment'
 
 // Zod validation schema
 const tournamentSchema = z.object({
@@ -51,6 +51,7 @@ type FormProps = {
 const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(initialData?.logo || null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isImageUploading, setIsImageUploading] = useState(false)
   // Keep track of the original image URL for edit mode
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(initialData?.logo || null)
 
@@ -96,11 +97,13 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
   }, [initialData, reset])
 
   const handleImageUpload = (url: string) => {
+
     setImageUrl(url)
+    
     setValue('logo', url, { shouldValidate: true })
   }
 
-  const {mutate ,isPending}=type === 'edit' ? useUpdateTournaments() : useCreateTournaments()
+  const {mutate ,isPending}=type === 'edit' ? useUpdateTournament() : useCreateTournament()
 
   const onFormSubmit = async (data: TournamentFormData) => {
     if (!imageUrl) {
@@ -167,22 +170,23 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
             <div className="bg-primary p-2 rounded-lg">
               <Trophy className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span>{type === 'edit' ? 'Edit Tournament' : 'Create New Tournament'}</span>
+            <span className="text-foreground">{type === 'edit' ? 'Edit Tournament' : 'Create New Tournament'}</span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             {type === 'edit' ? 'Update the details below to edit the tournament.' : 'Fill in the details below to create a new tournament.'}
           </DialogDescription>
         </DialogHeader>
 
         {/* Tournament Banner */}
         <div className="mb-6">
-          <Label className="mb-2 block">{type === 'edit' ? 'Change Image' : 'Tournament Banner'}</Label>
+          <Label className="mb-2 block text-foreground">{type === 'edit' ? 'Change Image' : 'Tournament Banner'}</Label>
           <CloudinaryUploader
             onImageUpload={handleImageUpload}
             previewImage={imageUrl}
             placeholderText={type === 'edit' ? 'Change image' : 'Drop your image here, or browse'}
             aspectRatio="rectangle"
-            className="border-2 border-dashed rounded-lg hover:border-primary transition-colors w-full min-h-[220px] flex items-center justify-center"
+            className="border-2 border-dashed border-border rounded-lg hover:border-primary transition-colors w-full min-h-[220px] flex items-center justify-center"
+            onUploadingChange={setIsImageUploading}
           />
           {!imageUrl && (
             <p className="text-sm font-medium text-destructive mt-2">
@@ -195,13 +199,13 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
           <div className="grid grid-cols-1 gap-6">
             {/* Tournament Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">Tournament Name</Label>
+              <Label htmlFor="name" className="text-foreground">Tournament Name</Label>
               <Input
                 {...register('name')}
                 type="text"
                 id="name"
                 placeholder="Enter tournament name"
-                className="bg-transparent"
+                className="bg-background"
               />
               {errors.name && (
                 <p className="text-sm font-medium text-destructive">
@@ -214,13 +218,13 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Primary Color */}
               <div className="space-y-2">
-                <Label htmlFor="primaryColor">Primary Color</Label>
+                <Label htmlFor="primaryColor" className="text-foreground">Primary Color</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     {...register('primaryColor')}
                     id="primaryColor"
-                    className="w-10 h-10 p-0 rounded  flex-shrink-0"
+                    className="w-10 h-10 p-0 rounded flex-shrink-0"
                     value={watch('primaryColor')}
                     onChange={e => setValue('primaryColor', e.target.value, { shouldValidate: true })}
                   />
@@ -228,7 +232,7 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
                     {...register('primaryColor')}
                     type="text"
                     placeholder="#000000"
-                    className="bg-transparent flex-1 min-w-0"
+                    className="bg-background flex-1 min-w-0"
                   />
                 </div>
                 {errors.primaryColor && (
@@ -240,13 +244,13 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
 
               {/* Secondary Color */}
               <div className="space-y-2">
-                <Label htmlFor="secondaryColor">Secondary Color</Label>
+                <Label htmlFor="secondaryColor" className="text-foreground">Secondary Color</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     {...register('secondaryColor')}
                     id="secondaryColor"
-                    className="w-10 h-10 p-0 rounded  flex-shrink-0"
+                    className="w-10 h-10 p-0 rounded flex-shrink-0"
                     value={watch('secondaryColor')}
                     onChange={e => setValue('secondaryColor', e.target.value, { shouldValidate: true })}
                   />
@@ -254,7 +258,7 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
                     {...register('secondaryColor')}
                     type="text"
                     placeholder="#ffffff"
-                    className="bg-transparent flex-1 min-w-0"
+                    className="bg-background flex-1 min-w-0"
                   />
                 </div>
                 {errors.secondaryColor && (
@@ -266,13 +270,13 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
 
               {/* Text Color 1 */}
               <div className="space-y-2">
-                <Label htmlFor="textColor1">Text Color 1</Label>
+                <Label htmlFor="textColor1" className="text-foreground">Text Color 1</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     {...register('textColor1')}
                     id="textColor1"
-                    className="w-10 h-10 p-0 rounded  flex-shrink-0"
+                    className="w-10 h-10 p-0 rounded flex-shrink-0"
                     value={watch('textColor1')}
                     onChange={e => setValue('textColor1', e.target.value, { shouldValidate: true })}
                   />
@@ -280,7 +284,7 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
                     {...register('textColor1')}
                     type="text"
                     placeholder="#000000"
-                    className="bg-transparent flex-1 min-w-0"
+                    className="bg-background flex-1 min-w-0"
                   />
                 </div>
                 {errors.textColor1 && (
@@ -292,13 +296,13 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
 
               {/* Text Color 2 */}
               <div className="space-y-2">
-                <Label htmlFor="textColor2">Text Color 2</Label>
+                <Label htmlFor="textColor2" className="text-foreground">Text Color 2</Label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     {...register('textColor2')}
                     id="textColor2"
-                    className="w-10 h-10 p-0 rounded  flex-shrink-0"
+                    className="w-10 h-10 p-0 rounded flex-shrink-0"
                     value={watch('textColor2')}
                     onChange={e => setValue('textColor2', e.target.value, { shouldValidate: true })}
                   />
@@ -306,7 +310,7 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
                     {...register('textColor2')}
                     type="text"
                     placeholder="#ffffff"
-                    className="bg-transparent flex-1 min-w-0"
+                    className="bg-background flex-1 min-w-0"
                   />
                 </div>
                 {errors.textColor2 && (
@@ -330,16 +334,17 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
             </Button>
             <Button
               type="submit"
-              disabled={!isValid || !imageUrl || isSubmitting}
+              disabled={!isValid || !imageUrl || isSubmitting || isPending || isImageUploading}
               className="flex-1 sm:flex-none sm:max-w-xs order-1 sm:order-2"
             >
-              {isSubmitting ? (
+              {isSubmitting || isPending ? (
                 <>
                   <span className="animate-spin mr-2">↻</span>
                   {type === 'edit' ? 'Updating...' : 'Creating...'}
                 </>
               ) : (
                 type === 'edit' ? 'Update Tournament' : 'Create Tournament'
+
               )}
             </Button>
           </div>

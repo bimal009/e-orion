@@ -1,26 +1,30 @@
 "use client"
-import { Trophy } from 'lucide-react'
-import TournamentButton from './TeamButton'
-import { Round, Team } from '@/lib/types'
+import { Trophy, ArrowLeft } from 'lucide-react'
+import { Team } from '@/lib/types'
 import { useState } from 'react'
 import { useQueryState } from 'nuqs'
 import SearchButton from '../tournments/SearchButton'
 import TeamCard from './TeamCard'
 import TeamForm from './TeamForm'
-import { UseGetRounds, UseGetRoundsBySearch } from '../api/useRound'
 import TeamButton from './TeamButton'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import RoundButton from '../rounds/RoundButton'
-
+import { useGetTeams, useGetTeamsBySearch } from '../api/useTeams'
+import { FullScreenLoader } from '@/components/shared/Loader'
+  
 const TeamList = ({tournmentId}:{tournmentId:string}) => {
   const [search] = useQueryState('search')
   const router = useRouter()
-  // const { data, isPending } = UseGetTeams()
-  // const {data:data2, isPending:isPending2}=UseGetTeamsBySearch(search || "")
+  const {data: allTeams, isPending: isPendingAll, isFetching: isFetchingAll} = useGetTeams(tournmentId)
+  const {data: searchResults, isPending: isPendingSearch, isFetching: isFetchingSearch} = useGetTeamsBySearch(tournmentId, search || '')
+  
+  const data = search ? searchResults : allTeams
+  const isPending = search ? isPendingSearch : isPendingAll
+  const isFetching = search ? isFetchingSearch : isFetchingAll
+
   const [formOpen, setFormOpen] = useState(false)
   const [formType, setFormType] = useState<'create' | 'edit'>('create')
-    const [editTeam, setEditTeam] = useState<Team | null>(null)
+  const [editTeam, setEditTeam] = useState<Team | null>(null)
 
   const handleEdit = (team: Team) => {
     setEditTeam(team)
@@ -32,54 +36,48 @@ const TeamList = ({tournmentId}:{tournmentId:string}) => {
     setEditTeam(null)
     setFormType('create')
     setFormOpen(true)
-    console.log(formOpen)
   }
 
-  // const teams = search ? data2 : data;
-
-  if (isPending) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <TeamButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-transparent border border-primary rounded-lg p-6 animate-pulse">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-12 h-12 bg-primary/20 rounded-lg" />
-                <div className="flex-1">
-                  <div className="h-6 bg-primary/20 rounded w-3/4" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 bg-primary/20 rounded w-1/2" />
-                <div className="h-4 bg-primary/20 rounded w-1/3" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
+  // Only show full screen loader on initial load, not during search
+  if (isPending && !search) {
+    return <FullScreenLoader />
   }
 
   return (
     <div className="space-y-6">
-      <div className='w-full'>
+      <div className="w-full">
         <SearchButton/>
       </div>
+      
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Button 
+            onClick={() => router.push('/dashboard')} 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-2 text-sm font-medium bg-background hover:bg-accent cursor-pointer border-border hover:border-primary"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div className="flex items-center gap-2 ml-4">
+            <Button onClick={() => router.push(`/dashboard/tournment/${tournmentId}`)} variant="outline" className="text-xl font-semibold bg-transparent hover:bg-transparent hover:text-primary cursor-pointer border-b-2 border-transparent">Rounds</Button>
+            <Button onClick={() => router.push(`/dashboard/tournment/${tournmentId}/teams`)} variant="outline" className="text-xl font-semibold bg-transparent hover:bg-transparent hover:text-primary cursor-pointer border-b-2 border-primary text-primary">Teams</Button>
+          </div>
+        </div>
+        <div className="w-full sm:w-auto">
+          <TeamButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />
+        </div>
+      </div>
+
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Button onClick={() => router.push(`/dashboard/tournment/${tournmentId}`)} variant="outline" className="text-xl font-semibold bg-transparent hover:bg-transparent cursor-pointer ">Rounds</Button>
-          <Button onClick={() => router.push(`/dashboard/tournment/${tournmentId}/teams`)} variant="outline" className="text-xl font-semibold bg-transparent hover:bg-transparent cursor-pointer border-b-2 border-primary">Teams</Button>
+          <span className="text-xl font-semibold text-foreground">Teams</span>
+          {isFetching && search && (
+            <div className="text-sm text-muted-foreground">Searching...</div>
+          )}
         </div>
-
-      <div>
-
-        <TeamButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />
       </div>
-      </div>
-      {/* Remove the conditional rendering - always render the form */}
+     
       <TeamForm
         opened={formOpen}
         onClose={() => setFormOpen(false)}
@@ -88,19 +86,23 @@ const TeamList = ({tournmentId}:{tournmentId:string}) => {
         tournmentId={tournmentId}
       />
       
-      { !teams || teams.length === 0 ? (
+      { !data || data.length === 0 ? (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-primary rounded-full flex items-center justify-center mb-4">
-            <Trophy className="w-12 h-12 text-white" />
+            <Trophy className="w-12 h-12 text-primary-foreground" />
           </div>
-          <h3 className="text-lg font-medium text-primary mb-2">No Rounds yet</h3>
-          <p className="text-gray-500 mb-6">Get started by creating your first Rounds</p>
-          <RoundButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />
+          <h3 className="text-lg font-medium text-primary mb-2">
+            {search ? 'No teams found' : 'No teams yet'}
+          </h3>
+          <p className="text-muted-foreground mb-6">
+            {search ? 'Try adjusting your search terms' : 'Get started by creating your first team'}
+          </p>
+          {!search && <TeamButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {teams?.map((team:Team) => (
-            <TeamCard key={team.id?.toString()} team={team}  onEdit={handleEdit} />
+          {data?.map((team: Team) => (
+            <TeamCard key={team.id?.toString()} team={team} onEdit={handleEdit} />
           ))}
         </div>
       )}

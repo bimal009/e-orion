@@ -48,7 +48,7 @@ export interface User {
     ownerId:string
     id?: string;
     name: string;
-    logo: string;
+    logo: string | null;
     owner?: User;
     rounds?: Round[];
     groups?: Group[];
@@ -58,6 +58,7 @@ export interface User {
     secondaryColor: string;
     textColor1: string;
     textColor2: string;
+    teams?: Team[];
   }
   
   export interface Round {
@@ -66,39 +67,53 @@ export interface User {
     tournamentId: string;
     tournament?: Tournament;
     matches?: Match[];
-    numberOfMatches: number;
+    groups?: Group[];
+    numberOfDays?: number;
   }
   
   export interface Match {
-    id: string;
-    matchNo: number;
-    name: string;
-    roundId: string;
-    round?: Round;
-    mapId: string;
-    map?: Map;
-    startTime: Date;
-    endTime?: Date;
-    teams?: Team[];
-  }
+  id: string;
+  matchNo: number;
+  name: string;
+  roundId: string;
+  round?: Round;
+  mapId: string;
+  map?: Map;
+  startTime: Date;
+  endTime?: Date | null;
+  groupId?: string | null;
+  group?: Group;
+  teams?: Team[];
+}
   
   export interface Team {
     id: string;
     name: string;
-    logo?: string;
+    teamTag?: string | null;
+    logo?: string | null;
     players?: Player[];
-    groupId?: string;
+    groupId?: string | null;
     group?: Group;
     matches?: Match[];
+    tournamentId: string;
+    tournament?: Tournament;
+    roundId?: string | null;
+    round?: Round;
+    email?: string | null;
+    phone?: string | null;
+    isSelected?: boolean;
   }
   
   export interface Player {
     id: string;
     name: string;
     ign: string;
-    role?: string;
+    role?: string | null;
     teamId: string;
     team?: Team;
+    image?: string | null;
+    email?: string | null;
+    phone?: string | null;
   }
   
   export interface Group {
@@ -107,6 +122,9 @@ export interface User {
     tournamentId: string;
     tournament?: Tournament;
     teams?: Team[];
+    matches?: Match[];
+    roundId?: string | null;
+    round?: Round;
   }
   
   export interface Map {
@@ -118,7 +136,7 @@ export interface User {
 
   export type TournamentCreateInput = {
     name: string;
-    logo: string;
+    logo?: string | null;
     primaryColor: string;
     secondaryColor: string;
     textColor1: string;
@@ -129,5 +147,39 @@ export interface User {
     id?: string;
     name: string;
     tournamentId: string;
-    numberOfMatches: number;
+    numberOfDays: number;
+  };
+
+  export type TeamCreateInput = {
+    id?: string;
+    name: string;
+    tournamentId: string;
+    teamTag?: string | null;
+    logo?: string | null;
+    groupId?: string | null;
+    roundId?: string | null;
+    players?: Player[];
+    image?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  };
+
+  export type MatchCreateInput = {
+    id?: string;
+    matchNo: number;
+    name: string;
+    roundId: string;
+    mapId: string;
+    startTime: Date;
+    endTime?: Date;
+    groupId?: string | null;
+  };
+
+  export type GroupCreateInput = {
+    id?: string;
+    name: string;
+    tournamentId: string;
+    roundId?: string | null;
+    teams?: Team[];
+    matches?: Match[];
   };

@@ -16,11 +16,11 @@ const TeamButton = ({ type, onClick, tournmentId }: ButtonProps) => {
   return (
     <>
       <Button variant="default" onClick={onClick ? onClick : () => setOpened(true)}>
-        {type === 'edit' ? 'Edit Round' : 'Create Round'}
+        {type === 'edit' ? 'Edit Team' : 'Create Team'}
       </Button>
 
       {!onClick && (
-        <RoundForm
+        <TeamForm
           opened={opened}
           onClose={() => setOpened(false)}
           type={type}

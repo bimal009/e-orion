@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import RoundForm from '../rounds/RoundForm'
+import React, { useState } from 'react'
+import GroupForm from './GroupForm'
 
 type ButtonProps = {
   type: 'edit' | 'create' // Only allow valid types
@@ -10,17 +10,17 @@ type ButtonProps = {
   tournmentId: string
 }
 
-const RoundButton = ({ type, onClick, tournmentId }: ButtonProps) => {
+const GroupButton = ({ type, onClick, tournmentId }: ButtonProps) => {
   const [opened, setOpened] = useState(false)
 
   return (
     <>
       <Button variant="default" onClick={onClick ? onClick : () => setOpened(true)}>
-        {type === 'edit' ? 'Edit Round' : 'Create Round'}
+        {type === 'edit' ? 'Edit Group' : 'Create Group'}
       </Button>
 
       {!onClick && (
-        <RoundForm
+        <GroupForm
           opened={opened}
           onClose={() => setOpened(false)}
           type={type}
@@ -31,4 +31,4 @@ const RoundButton = ({ type, onClick, tournmentId }: ButtonProps) => {
   )
 }
 
-export default RoundButton
+export default GroupButton

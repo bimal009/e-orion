@@ -27,6 +27,9 @@ export const createTournment = async (data: TournamentCreateInput & { ownerId?: 
         textColor1: data.textColor1,
         textColor2: data.textColor2,
       },
+      include: {
+        teams: true,
+      },
     })
     console.log(tournament)
     return tournament
@@ -48,11 +51,14 @@ export const createTournment = async (data: TournamentCreateInput & { ownerId?: 
       where: { id },
       data: {
         name: data.name,
-        logo: data.logo,
+            logo: data.logo || "",
         primaryColor: data.primaryColor,
         secondaryColor: data.secondaryColor,
         textColor1: data.textColor1,
         textColor2: data.textColor2,
+      },
+      include: {
+        teams: true,
       },
     })
     return tournament
@@ -68,7 +74,7 @@ export const getTournaments = async () => {
       const session = await getServerSession(authOptions)
   
       if (!session?.user?.id) {
-        throw new Error("User not authenticated")
+        throw new Error("User not authenticated") 
       }
   
       const userWithTournaments = await prisma.user.findUnique({
@@ -109,6 +115,7 @@ export const getTournaments = async () => {
           },
           ownerId: session.user.id,
         },
+        include: { teams: true, rounds: true },
       })
   
       console.log(tournaments)
@@ -132,6 +139,7 @@ export const getTournaments = async () => {
       // Optional: check if the tournament belongs to the current user before deleting
       const tournament = await prisma.tournament.findUnique({
         where: { id },
+        include: { teams: true },
       })
   
       if (!tournament || tournament.ownerId !== session.user.id) {
@@ -142,6 +150,7 @@ export const getTournaments = async () => {
         where: { id },
         include: {
           rounds: true,
+          teams: true,
         },
       })
   

@@ -16,7 +16,8 @@
   import { Input } from "@/components/ui/input"
   import { Label } from "@/components/ui/label"
   import { toast } from 'sonner'
-  import { useCreateRounds, useUpdateRounds } from '../api/useRound'  
+  import { useCreateRound, useUpdateRound } from '../api/useRound'  
+
 
   // Zod validation schema
   const roundSchema = z.object({
@@ -25,10 +26,12 @@
       .min(3, 'Round name must be at least 3 characters')
       .max(50, 'Round name must be less than 50 characters')
       .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Round name can only contain letters, numbers, spaces, hyphens, and underscores'),
-    numberOfMatches: z.coerce.number({
-      invalid_type_error: 'Please enter a valid number of matches',
-      required_error: 'Number of matches is required',
+    
+    numberOfDays: z.coerce.number({
+      invalid_type_error: 'Please enter a valid number of days',
+      required_error: 'Number of days is required',
     }),
+    
   })
 
   type RoundFormData = z.infer<typeof roundSchema>
@@ -44,6 +47,7 @@
 
   const RoundForm = ({ opened, onClose, onSubmit, type, initialData, tournmentId }: FormProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isImageUploading, setIsImageUploading] = useState(false)
 
     const {
       register,
@@ -57,7 +61,7 @@
       mode: 'onChange',
       defaultValues: initialData || {
         name: '',
-        numberOfMatches: 0,
+        numberOfDays: 0,
       },
       
     })
@@ -68,14 +72,14 @@
       } else {
         reset({
           name: '',
-          numberOfMatches: 0,
-        })
+          numberOfDays: 0,
+          })
       }
     }, [initialData, reset])
 
   
 
-    const {mutate ,isPending}=type === 'edit' ? useUpdateRounds() : useCreateRounds()
+    const {mutate ,isPending}=type === 'edit' ? useUpdateRound() : useCreateRound()
 
     const onFormSubmit = async (data: RoundFormData) => {
 
@@ -124,26 +128,35 @@
               <div className="bg-primary p-2 rounded-lg">
                 <Trophy className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span>{type === 'edit' ? 'Edit Round' : 'Create New Round'}</span>
+              <span className="text-foreground">{type === 'edit' ? 'Edit Round' : 'Create New Round'}</span>
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-muted-foreground">
               {type === 'edit' ? 'Update the details below to edit the round.' : 'Fill in the details below to create a new round.'}
             </DialogDescription>
           </DialogHeader>
 
 
 
+          {/* Example image upload field for round (add or remove as needed) */}
+          {/* <CloudinaryUploader
+            onImageUpload={url => setValue('logo', url, { shouldValidate: true })}
+            previewImage={watch('logo') || null}
+            onUploadingChange={setIsImageUploading}
+            aspectRatio="rectangle"
+            placeholderText="Upload Round Image"
+          /> */}
+
           <form onSubmit={handleSubmit(onFormSubmit)}>
             <div className="grid grid-cols-1 gap-6">
               {/* Tournament Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">Round Name</Label>
+                <Label htmlFor="name" className="text-foreground">Round Name</Label>
                 <Input
                   {...register('name')}
                   type="text"
                   id="name"
                   placeholder="Enter round name"
-                  className="bg-transparent"
+                  className="bg-background"
                 />
                 {errors.name && (
                   <p className="text-sm font-medium text-destructive">
@@ -152,20 +165,21 @@
                 )}
               </div>
 
+             
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Primary Color */}
+                {/* Number of Days */}
                 <div className="space-y-2">
-                  <Label htmlFor="numberOfMatches">Matches</Label>
+                  <Label htmlFor="numberOfDays" className="text-foreground">Days</Label>
                   <Input
-                    {...register('numberOfMatches', { valueAsNumber: true })}
+                    {...register('numberOfDays', { valueAsNumber: true })}
                     type="number"
-                    id="numberOfMatches"
-                    placeholder="Number of matches"
-                    className="bg-transparent"
+                    id="numberOfDays"
+                    placeholder="Number of days"
+                    className="bg-background"
                   />
-                  {errors.numberOfMatches && (
+                  {errors.numberOfDays && (
                     <p className="text-sm font-medium text-destructive">
-                      {errors.numberOfMatches.message}
+                      {errors.numberOfDays.message}
                     </p>
                   )}
                 </div>
@@ -189,7 +203,7 @@
               </Button>
               <Button
                 type="submit"
-                disabled={!isValid  || isSubmitting}
+                disabled={!isValid || isSubmitting || isImageUploading}
                 className="flex-1 sm:flex-none sm:max-w-xs order-1 sm:order-2"
               >
                 {isSubmitting ? (

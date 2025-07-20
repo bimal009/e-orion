@@ -9,6 +9,7 @@ interface CloudinaryUploaderProps {
     className?: string;
     aspectRatio?: 'square' | 'rectangle' | 'circle';
     placeholderText?: string;
+    onUploadingChange?: (uploading: boolean) => void;
 }
 
 const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
@@ -16,7 +17,8 @@ const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
     previewImage,
     className = '',
     aspectRatio = 'square',
-    placeholderText = 'Upload Image'
+    placeholderText = 'Upload Image',
+    onUploadingChange
 }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
@@ -35,6 +37,7 @@ const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
 
         try {
             setIsUploading(true);
+            if (typeof onUploadingChange === 'function') onUploadingChange(true);
             setUploadError(null);
 
             const formData = new FormData();
@@ -64,13 +67,14 @@ const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
             setUploadError('Failed to upload image. Please try again.');
         } finally {
             setIsUploading(false);
+            if (typeof onUploadingChange === 'function') onUploadingChange(false);
         }
     };
 
     return (
         <div className="flex flex-col items-center">
             <div
-                className={`${containerClasses[aspectRatio]} bg-background overflow-hidden mb-2 cursor-pointer relative ${className}`}
+                className={`${containerClasses[aspectRatio]} bg-muted overflow-hidden mb-2 cursor-pointer relative ${className}`}
                 onClick={() => fileInputRef.current?.click()}
             >
                 {previewImage ? (
@@ -83,24 +87,24 @@ const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
                 />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <Upload size={aspectRatio === 'circle' ? 24 : 32} className="text-gray-400" />
+                        <Upload size={aspectRatio === 'circle' ? 24 : 32} className="text-muted-foreground" />
                     </div>
                 )}
 
                 {isUploading && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <div className="loader w-8 h-8 border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+                        <div className="loader w-8 h-8 border-4 border-t-4 border-muted border-t-primary rounded-full animate-spin"></div>
                     </div>
                 )}
             </div>
 
             {uploadError && (
-                <p className="text-sm text-red-500 mb-2">{uploadError}</p>
+                <p className="text-sm text-destructive mb-2">{uploadError}</p>
             )}
 
             <button
                 type="button"
-                className="text-sm text-white"
+                className="text-sm text-foreground"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
             >

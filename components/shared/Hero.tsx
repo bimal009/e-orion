@@ -59,7 +59,7 @@ const Hero = () => {
                         <div className="relative w-full max-w-lg">
                             <div className="aspect-square relative">
                                 <Image
-                                    src="/heropng.png"
+                                    src="/hero.webp"
                                     alt="Gaming controller with esports elements"
                                     fill
                                     priority
@@ -68,10 +68,10 @@ const Hero = () => {
                             </div>
 
                             {/* Balanced Glow Effects */}
-                            <div className="absolute -z-10 animate-pulse top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] rounded-full bg-primary/15 blur-[60px] animate-pulse"></div>
+                            <div className="absolute -z-10  top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] rounded-full bg-primary/15 blur-[60px] animate-pulse"></div>
                             <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] rounded-full bg-gradient-to-r from-primary/25 to-blue-500/25 blur-[40px]"></div>
                             <div className="absolute -z-10 top-1/3 right-1/3 w-16 h-16 rounded-full bg-cyan-400/40 blur-[20px] animate-pulse delay-300"></div>
-                            <div className="absolute -z-10 bottom-1/3 left-1/3 w-12 h-12 rounded-full bg-purple-400/40 blur-[15px] animate-pulse delay-700"></div>
+                            <div className="absolute -z-10 bottom-1/3 left-1/3 w-12 h-12 rounded-full bg-white blur-[15px] animate-pulse delay-700"></div>
                         </div>
                     </div>
                 </div>

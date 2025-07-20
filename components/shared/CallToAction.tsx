@@ -24,7 +24,7 @@ const CallToAction = () => {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link href="/events/create">
-                                <Button size="lg" className="rounded-full px-8 bg-primary text-white hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
+                                <Button size="lg" className="rounded-full px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
                                     Start a Match
                                 </Button>
                             </Link>
