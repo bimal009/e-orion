@@ -6,17 +6,19 @@ import { useState } from 'react'
 import { useQueryState } from 'nuqs'
 import SearchButton from '../tournments/SearchButton'
 import GameCard from './GameCard'
-import RoundForm from './GameForm'
+import GameForm from './GameForm'
 import { useGetRounds, useGetRoundsBySearch } from '../api/useRound'
-import RoundButton from './GameButton'
+import GameButton from './GameButton'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { FullScreenLoader } from '@/components/shared/Loader'
+import { useGetTeams } from '../api/useTeams'
+import { useGetGames } from '../api/useGames'
 
 const GameList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) => {
   const [search] = useQueryState('search')
   const router = useRouter()
-  const { data, isPending } = useGetRounds(tournmentId  )
+  const { data, isPending } = useGetGames(tournmentId,roundId  )
   const { data: data2 } = useGetRoundsBySearch(tournmentId, search || "")
   const [formOpen, setFormOpen] = useState(false)
   const [formType, setFormType] = useState<'create' | 'edit'>('create')
@@ -64,15 +66,16 @@ const GameList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) => 
           </div>
         </div>
         <div className="w-full sm:w-auto">
-          <RoundButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />
+          <GameButton roundId={roundId}   type={formType} onClick={handleCreate} tournmentId={tournmentId} />
         </div>
-      </div>
-      <RoundForm
+        </div>
+        <GameForm
         opened={formOpen}
         onClose={() => setFormOpen(false)}
         type={formType}
         initialData={editRound}
         tournmentId={tournmentId}
+        roundId={roundId}
       />
       
       { !rounds || rounds.length === 0 ? (
@@ -82,7 +85,7 @@ const GameList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) => 
           </div>
           <h3 className="text-lg font-medium text-primary mb-2">No Rounds yet</h3>
           <p className="text-muted-foreground mb-6">Get started by creating your first Rounds</p>
-          <RoundButton type={formType} onClick={handleCreate} tournmentId={tournmentId} />
+          <GameButton roundId={roundId} type={formType} onClick={handleCreate} tournmentId={tournmentId} />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

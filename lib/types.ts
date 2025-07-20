@@ -183,3 +183,15 @@ export interface User {
     teams?: Team[];
     matches?: Match[];
   };
+
+  export type GameCreateInput = {
+    id?: string;
+    matchNo: number;
+    name: string;
+    roundId: string;
+    mapId: string;
+    startTime: Date;
+    endTime?: Date;
+    groupId?: string | null;
+    tournamentId: string;
+  };

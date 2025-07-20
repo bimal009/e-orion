@@ -8,9 +8,10 @@ type ButtonProps = {
   type: 'edit' | 'create' 
   onClick?: () => void
   tournmentId: string
+  roundId: string
 }
 
-const GameButton = ({ type, onClick, tournmentId }: ButtonProps) => {
+const GameButton = ({ type, onClick, tournmentId, roundId }: ButtonProps) => {
   const [opened, setOpened] = useState(false)
 
   return (
@@ -25,7 +26,7 @@ const GameButton = ({ type, onClick, tournmentId }: ButtonProps) => {
           onClose={() => setOpened(false)}
           type={type}
           tournmentId={tournmentId}
-          
+          roundId={roundId}          
         />
       )}
     </>

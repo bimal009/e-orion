@@ -2,11 +2,11 @@
 
 import { authOptions } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { MatchCreateInput, TeamCreateInput } from "@/lib/types"
+import { GameCreateInput, MatchCreateInput, TeamCreateInput } from "@/lib/types"
 import { handleError } from "@/lib/utils"
 import { getServerSession } from "next-auth"
 
-  export const createMatch = async (data: MatchCreateInput) => {
+  export const createGame = async (data: GameCreateInput) => {
   try {
     const session = await getServerSession(authOptions)
 
@@ -19,6 +19,7 @@ import { getServerSession } from "next-auth"
         matchNo: data.matchNo,
         name: data.name,
         roundId: data.roundId,
+        tournamentId: data.tournamentId,
         mapId: data.mapId,
         startTime: data.startTime,
         endTime: data.endTime || null,
@@ -33,7 +34,7 @@ import { getServerSession } from "next-auth"
   }
 }
 
-export const updateTeam = async (id: string, data: TeamCreateInput) => {
+export const updateGame = async (id: string, data: GameCreateInput) => {
   try {
     const session = await getServerSession(authOptions)
 
@@ -41,58 +42,38 @@ export const updateTeam = async (id: string, data: TeamCreateInput) => {
       throw new Error("User not authenticated")
     }
 
-    const currentTeam = await prisma.team.findUnique({
+    const currentGame = await prisma.match.findUnique({
       where: { id },
-      include: { players: true },
     })
 
-    if (!currentTeam) {
-      throw new Error("Team not found")
+    if (!currentGame) {
+      throw new Error("Game not found")
     }
 
-    // Delete existing players first
-    await prisma.player.deleteMany({
-      where: { teamId: id },
-    })
+    const updateData: any = {
+      name: data.name,
+      tournamentId: data.tournamentId,
+    };
+    if (data.groupId !== undefined) updateData.groupId = data.groupId;
+    if (data.roundId !== undefined) updateData.roundId = data.roundId;
 
     // Update the team with new players
-    const team = await prisma.team.update({
+    const game = await prisma.match.update({
       where: { id },
-      data: {
-        name: data.name,
-        tournamentId: data.tournamentId,
-        logo: data.logo || null,
-        groupId: data.groupId || null,
-        roundId: data.roundId || null,
-        teamTag: data.teamTag ?? null,
-        email: data.email || null,
-        phone: data.phone || null,
-        // Create new players
-        players: data.players && data.players.length > 0 ? {
-          create: data.players.map((player) => ({
-            name: player.name,
-            ign: player.ign,
-            role: player.role || null,
-            image: player.image || null,
-            email: player.email || null,
-            phone: player.phone || null,
-          })),
-        } : undefined,
-      },
+      data: updateData,
       include: {
         tournament: true,
-        players: true,
         round: true,
       },
     })
-    return team
+    return game
   } catch (error) {
     handleError(error)
-    throw new Error("Failed to update team")
+    throw new Error("Failed to update game")
   }
 }
 
-export const getTeams = async (tournmentId: string) => {
+export const getGames = async (tournmentId: string,roundId:string) => {
   try {
     const session = await getServerSession(authOptions)
 
@@ -104,20 +85,20 @@ export const getTeams = async (tournmentId: string) => {
       throw new Error("Tournament ID is required")
     }
 
-    const teams = await prisma.team.findMany({
-      where: { tournamentId: tournmentId },
-      include: { tournament: true, players: true },
+    const games = await prisma.match.findMany({
+      where: { tournamentId: tournmentId,roundId:roundId },
+      include: { tournament: true },
       orderBy: { id: 'asc' },
     })
 
-    return teams || []
+    return games || []
   } catch (error) {
     handleError(error)
-    throw new Error("Failed to fetch teams")
+    throw new Error("Failed to fetch games")
   }
 }
 
-export const getTeamsWithSearch = async (tournmentId: string, search: string) => {
+export const getGamesWithSearch = async (tournmentId: string, search: string) => {
   try {
     const session = await getServerSession(authOptions)
 
@@ -129,7 +110,7 @@ export const getTeamsWithSearch = async (tournmentId: string, search: string) =>
       throw new Error("Tournament ID is required")
     }
 
-    const teams = await prisma.team.findMany({
+    const games = await prisma.match.findMany({
       where: {
         tournamentId: tournmentId,
         name: {
@@ -137,19 +118,19 @@ export const getTeamsWithSearch = async (tournmentId: string, search: string) =>
           mode: 'insensitive',
         },
       },
-      include: { players: true },
+      include: { tournament: true },
     })
 
-    console.log(teams)
+    console.log(games)
 
-    return teams || []
+    return games || []
   } catch (error) {
     handleError(error)
-    throw new Error("Failed to fetch teams")
+    throw new Error("Failed to fetch games")
   }
 }
 
-export const deleteTeam = async (teamId: string) => {
+export const deleteGame = async (gameId: string) => {
   try {
     const session = await getServerSession(authOptions)
 
@@ -158,47 +139,44 @@ export const deleteTeam = async (teamId: string) => {
     }
 
     // Optional: check if the tournament belongs to the current user before deleting
-    const team = await prisma.team.findUnique({
-      where: { id: teamId },
-      include: { players: true },
+    const game = await prisma.match.findUnique({
+      where: { id: gameId },
+      include: { tournament: true },
     })
 
-    if (!team || !session.user.id) {
-      throw new Error("Team not found or you're not authorized to delete it")
+    if (!game || !session.user.id) {
+      throw new Error("Game not found or you're not authorized to delete it")
     }
 
     // Delete players first (if not using CASCADE)
-    await prisma.player.deleteMany({
-      where: { teamId: teamId },
-    })
 
     // Then delete the team
-    const deletedTeam = await prisma.team.delete({
-      where: { id: teamId },
-      include: { players: true },
+      const deletedGame = await prisma.match.delete({
+      where: { id: gameId },
+      include: { tournament: true },
     })
 
-    return deletedTeam
+    return deletedGame
   } catch (error) {
     handleError(error)
-    throw new Error("Failed to delete team")
+    throw new Error("Failed to delete game")
   }
 }
 
-export const getTeamById = async (id: string) => {
+export const getGameById = async (id: string) => {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       throw new Error("User not authenticated")
     }
-    const team = await prisma.team.findUnique({
+    const game = await prisma.match.findUnique({
       where: { id },
-      include: { tournament: true, players: true, round: true },
+      include: { tournament: true, round: true },
     })
-    if (!team) throw new Error("Team not found")
-    return team
+    if (!game) throw new Error("Game not found")
+    return game
   } catch (error) {
     handleError(error)
-    throw new Error("Failed to fetch team")
+    throw new Error("Failed to fetch game")
   }
 }

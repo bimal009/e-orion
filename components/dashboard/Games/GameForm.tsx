@@ -1,161 +1,236 @@
-  'use client'
+'use client'
 
-  import React, { useState } from 'react'
-  import { useForm } from 'react-hook-form'
-  import { zodResolver } from '@hookform/resolvers/zod'
-  import { z } from 'zod'
-  import { X, Trophy } from 'lucide-react'
-  import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-  } from "@/components/ui/dialog"
-  import { Button } from "@/components/ui/button"
-  import { Input } from "@/components/ui/input"
-  import { Label } from "@/components/ui/label"
-  import { toast } from 'sonner'
-  import { useCreateRound, useUpdateRound } from '../api/useRound'  
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { X, Trophy } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { toast } from 'sonner'
+import { useCreateRound, useUpdateRound } from '../api/useRound'  
+import { useGetMaps } from '../api/useMaps'
+import { useGetGroups } from '../api/useGroup'
+import { useCreateGame, useUpdateGame } from '../api/useGames'
 
+// Zod validation schema
+const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-  // Zod validation schema
-  const gameSchema = z.object({
-    name: z
-      .string()
-      .min(3, 'Round name must be at least 3 characters')
-      .max(50, 'Round name must be less than 50 characters')
-      .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Round name can only contain letters, numbers, spaces, hyphens, and underscores'),
+// Helper to convert time string (HH:mm) to Date object (today's date)
+function timeStringToDate(time: string): Date {
+  const [hours, minutes] = time.split(":").map(Number);
+  const now = new Date();
+  now.setHours(hours, minutes, 0, 0);
+  return now;
+}
+
+const gameSchema = z.object({
+  matchNo: z.coerce.number({
+    invalid_type_error: 'Please enter a valid match number',
+    required_error: 'Match number is required',
+  }).min(1, 'Match number must be at least 1'),
+  
+  name: z
+    .string()
+    .min(3, 'Game name must be at least 3 characters')
+    .max(50, 'Game name must be less than 50 characters')
+    .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Game name can only contain letters, numbers, spaces, hyphens, and underscores'),
+  
+  mapId: z
+    .string()
+    .min(1, 'Please select a map'),
+  
+  startTime: z
+    .string()
+    .min(1, 'Start time is required')
+    .regex(timeRegex, 'Please enter a valid start time (HH:mm)'),
     
-    numberOfDays: z.coerce.number({
-      invalid_type_error: 'Please enter a valid number of days',
-      required_error: 'Number of days is required',
-    }),
+  endTime: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (!val) return true
+      return timeRegex.test(val)
+    }, 'Please enter a valid end time (HH:mm)'),
     
+  groupId: z
+    .string()
+    .optional(),
+    
+
+})
+
+type GameFormData = z.infer<typeof gameSchema>
+
+type GameFormProps = {
+  opened: boolean
+  onClose?: () => void
+  onSubmit?: (data: GameFormData) => void
+  type: 'create' | 'edit'
+  initialData?: any
+  tournmentId: string
+  roundId: string
+}
+
+const GameForm = ({ 
+  opened, 
+  onClose, 
+  onSubmit, 
+  type, 
+  initialData, 
+  tournmentId, 
+  roundId
+}: GameFormProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Fetch data using hooks
+  const { data: mapsData } = useGetMaps()
+  const { data: groupsData } = useGetGroups(tournmentId)
+  const { mutate, isPending } = type === 'edit' ? useUpdateGame() : useCreateGame()
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    reset,
+    setValue,
+    watch,
+    control
+  } = useForm<GameFormData>({
+    resolver: zodResolver(gameSchema),
+    mode: 'onChange',
+    defaultValues: initialData || {
+      matchNo: 1,
+      name: '',
+      mapId: '',
+      startTime: '',
+      endTime: '',
+      groupId: '',
+    },
   })
 
-  type GameFormData = z.infer<typeof gameSchema>
-
-  type GameFormProps = {
-    opened: boolean
-    onClose?: () => void
-    onSubmit?: (data: GameFormData) => void
-    type: 'create' | 'edit'
-    initialData?: any
-    tournmentId: string
-  }
-
-  const GameForm = ({ opened, onClose, onSubmit, type, initialData, tournmentId }: GameFormProps) => {
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [isImageUploading, setIsImageUploading] = useState(false)
-
-    const {
-      register,
-      handleSubmit,
-      formState: { errors, isValid },
-      reset,
-      setValue,
-      watch
-    } = useForm<GameFormData>({
-      resolver: zodResolver(gameSchema),
-      mode: 'onChange',
-      defaultValues: initialData || {
+  React.useEffect(() => {
+    if (initialData) {
+      const formattedData = {
+        ...initialData,
+        startTime: initialData.startTime ? initialData.startTime.slice(0, 5) : '',
+        endTime: initialData.endTime ? initialData.endTime.slice(0, 5) : '',
+      }
+      reset(formattedData)
+    } else {
+      reset({
+        matchNo: 1,
         name: '',
-        numberOfDays: 0,
-      },
-      
-    })
-
-    React.useEffect(() => {
-      if (initialData) {
-        reset({ ...initialData })
-      } else {
-        reset({
-          name: '',
-          numberOfDays: 0,
-          })
-      }
-    }, [initialData, reset])
-
-  
-
-    const {mutate ,isPending}=type === 'edit' ? useUpdateRound() : useCreateRound()
-
-    const onFormSubmit = async (data: GameFormData) => {
-
-
-      setIsSubmitting(true)
-      
-      try {
-        // Simulate API call - replace with your actual API call
-        
-        const formData = {
-          ...data,
-          ...(type === 'edit' && initialData?.id ? { id: initialData.id } : {}),
-          tournamentId: tournmentId,
-        }
-        
-        console.log('Round created:', formData)
-        mutate(formData)
-        
-        // Reset form
-        reset()
-        onClose?.()
-
-        toast.success(
-          type === 'edit' ? "Round updated successfully" : "Round created successfully",
-        )
-      } catch (error) {
-        console.error('Error creating round:', error)
-        toast.error(
-        type === 'edit' ? "Failed to update round" : "Failed to create round",
-        )
-      } finally {
-        setIsSubmitting(false)
-      }
+        mapId: '',
+        startTime: '',
+        endTime: '',
+        groupId: '',
+      })
     }
+  }, [initialData, reset])
 
-    const handleClose = () => {
+  const onFormSubmit = async (data: GameFormData) => {
+    setIsSubmitting(true)
+    
+    try {
+      const formData = {
+        ...data,
+        // Convert time strings to Date objects
+        startTime: timeStringToDate(data.startTime),
+        endTime: data.endTime ? timeStringToDate(data.endTime) : undefined,
+        ...(type === 'edit' && initialData?.id ? { id: initialData.id } : {}),
+        tournamentId: tournmentId,
+        roundId: roundId,
+      }
+      
+      console.log('Game created:', formData)
+      mutate(formData)
+      
       reset()
       onClose?.()
+
+      toast.success(
+        type === 'edit' ? "Game updated successfully" : "Game created successfully",
+      )
+    } catch (error) {
+      console.error('Error creating game:', error)
+      toast.error(
+        type === 'edit' ? "Failed to update game" : "Failed to create game",
+      )
+    } finally {
+      setIsSubmitting(false)
     }
+  }
 
-    return (
-      <Dialog open={opened} onOpenChange={(open) => { if (!open) handleClose(); }}>
-        <DialogContent className="sm:max-w-2xl max-w-[95vw] rounded-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <div className="bg-primary p-2 rounded-lg">
-                <Trophy className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <span className="text-foreground">{type === 'edit' ? 'Edit Round' : 'Create New Round'}</span>
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              {type === 'edit' ? 'Update the details below to edit the round.' : 'Fill in the details below to create a new round.'}
-            </DialogDescription>
-          </DialogHeader>
+  const handleClose = () => {
+    reset()
+    onClose?.()
+  }
 
+  // Extract maps array from the API response
+  const maps = mapsData || []
+  
+  // Extract groups array from the API response
+  const groups = groupsData || []
 
+  return (
+    <Dialog open={opened} onOpenChange={(open) => { if (!open) handleClose(); }}>
+      <DialogContent className="sm:max-w-3xl max-w-[95vw] rounded-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="bg-primary p-2 rounded-lg">
+              <Trophy className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <span className="text-foreground">{type === 'edit' ? 'Edit Game' : 'Create New Game'}</span>
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            {type === 'edit' ? 'Update the details below to edit the game.' : 'Fill in the details below to create a new game.'}
+          </DialogDescription>
+        </DialogHeader>
 
-          {/* Example image upload field for round (add or remove as needed) */}
-          {/* <CloudinaryUploader
-            onImageUpload={url => setValue('logo', url, { shouldValidate: true })}
-            previewImage={watch('logo') || null}
-            onUploadingChange={setIsImageUploading}
-            aspectRatio="rectangle"
-            placeholderText="Upload Round Image"
-          /> */}
-
-          <form onSubmit={handleSubmit(onFormSubmit)}>
-            <div className="grid grid-cols-1 gap-6">
-              {/* Tournament Name */}
+        <form onSubmit={handleSubmit(onFormSubmit)}>
+          <div className="grid grid-cols-1 gap-6">
+            {/* First Row: Match Number and Game Name */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-foreground">Round Name</Label>
+                <Label htmlFor="matchNo" className="text-foreground">Match Number</Label>
+                <Input
+                  {...register('matchNo', { valueAsNumber: true })}
+                  type="number"
+                  id="matchNo"
+                  placeholder="Enter match number"
+                  className="bg-background"
+                  min="1"
+                />
+                {errors.matchNo && (
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.matchNo.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-foreground">Game Name</Label>
                 <Input
                   {...register('name')}
                   type="text"
                   id="name"
-                  placeholder="Enter round name"
+                  placeholder="Enter game name"
                   className="bg-background"
                 />
                 {errors.name && (
@@ -164,62 +239,127 @@
                   </p>
                 )}
               </div>
+            </div>
 
-             
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Number of Days */}
-                <div className="space-y-2">
-                  <Label htmlFor="numberOfDays" className="text-foreground">Days</Label>
-                  <Input
-                    {...register('numberOfDays', { valueAsNumber: true })}
-                    type="number"
-                    id="numberOfDays"
-                    placeholder="Number of days"
-                    className="bg-background"
-                  />
-                  {errors.numberOfDays && (
-                    <p className="text-sm font-medium text-destructive">
-                      {errors.numberOfDays.message}
-                    </p>
-                  )}
-                </div>
+            {/* Second Row: Map Selection and Group */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="mapId" className="text-foreground">Map</Label>
+                <Select
+                  value={watch('mapId') || ''}
+                  onValueChange={(value) => setValue('mapId', value, { shouldValidate: true })}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select a map" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {maps.map((map) => (
+                      <SelectItem key={map.id} value={map.id}>
+                        {map.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.mapId && (
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.mapId.message}
+                  </p>
+                )}
+              </div>
 
-
-            
-
-              
+              <div className="space-y-2">
+                <Label htmlFor="groupId" className="text-foreground">Group (Optional)</Label>
+                <Select
+                  value={watch('groupId') || 'no-group'}
+                  onValueChange={(value) => setValue('groupId', value === 'no-group' ? '' : value, { shouldValidate: true })}
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="Select a group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no-group">No Group</SelectItem>
+                    {groups.map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.groupId && (
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.groupId.message}
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 justify-end mt-8">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                className="flex-1 sm:flex-none sm:max-w-xs order-2 sm:order-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={!isValid || isSubmitting || isImageUploading}
-                className="flex-1 sm:flex-none sm:max-w-xs order-1 sm:order-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="animate-spin mr-2">↻</span>
-                    {type === 'edit' ? 'Updating...' : 'Creating...'}
-                  </>
-                ) : (
-                    type === 'edit' ? 'Update Round' : 'Create Round'
+            {/* Third Row: Start and End Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="startTime" className="text-foreground">Start Time</Label>
+                <Input
+                  {...register('startTime')}
+                  type="time"
+                  id="startTime"
+                  className="bg-background"
+                />
+                {errors.startTime && (
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.startTime.message}
+                  </p>
                 )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    )
-  }
+              </div>
 
-  export default GameForm
+              <div className="space-y-2">
+                <Label htmlFor="endTime" className="text-foreground">End Time (Optional)</Label>
+                <Input
+                  {...register('endTime')}
+                  type="time"
+                  id="endTime"
+                  className="bg-background"
+                />
+                {errors.endTime && (
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.endTime.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+
+
+
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2 justify-end mt-8">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="flex-1 sm:flex-none sm:max-w-xs order-2 sm:order-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!isValid || isSubmitting || isPending}
+              className="flex-1 sm:flex-none sm:max-w-xs order-1 sm:order-2"
+            >
+              {isSubmitting || isPending ? (
+                <>
+                  <span className="animate-spin mr-2">↻</span>
+                  {type === 'edit' ? 'Updating...' : 'Creating...'}
+                </>
+              ) : (
+                type === 'edit' ? 'Update Game' : 'Create Game'
+              )}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export default GameForm

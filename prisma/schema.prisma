@@ -61,6 +61,7 @@ model Tournament {
   rounds    Round[] @relation("TournamentRounds")
   groups    Group[] @relation("TournamentGroups")
   teams     Team[] @relation("TournamentTeams")
+  matches   Match[] @relation("TournamentMatches")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   primaryColor String
@@ -94,9 +95,10 @@ model Match {
   map       Map          @relation(fields: [mapId], references: [id])
   startTime DateTime
   endTime   DateTime?
+  tournamentId String   @db.ObjectId
   groupId   String?      @db.ObjectId
   group     Group?       @relation(fields: [groupId], references: [id])
-
+  tournament Tournament @relation("TournamentMatches", fields: [tournamentId], references: [id], onDelete: Cascade)
   @@map("matches")
 }
 
