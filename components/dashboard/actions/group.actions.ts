@@ -262,3 +262,24 @@ export const getGroupsByRoundId = async (roundId: string) => {
     throw new Error("Failed to fetch groups")
   }
 }
+
+export const getGroupsByGameId = async (gameId: string) => {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      throw new Error("User not authenticated")
+    }
+    const groups = await prisma.group.findMany({
+      where: { matches: { some: { id: gameId } } },
+      include: {
+        tournament: true,
+        teams: { include: { players: true } },
+        matches: true,
+      },
+    })
+    return groups || []
+  } catch (error) {
+    handleError(error)
+    throw new Error("Failed to fetch groups")
+  }
+}

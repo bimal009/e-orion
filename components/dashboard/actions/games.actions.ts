@@ -23,6 +23,7 @@ import { getServerSession } from "next-auth"
         mapId: data.mapId,
         startTime: data.startTime,
         endTime: data.endTime || null,
+        day: data.day || null,
         ...(data.groupId && { groupId: data.groupId }),
       }
     })
@@ -58,8 +59,8 @@ export const updateGame = async (id: string, data: GameCreateInput) => {
       mapId: data.mapId,
       startTime: data.startTime,
       endTime: data.endTime || null,
+      day: data.day || null,
       ...(data.groupId && { groupId: data.groupId }),
-
     };
     if (data.groupId !== undefined) updateData.groupId = data.groupId;
     if (data.roundId !== undefined) updateData.roundId = data.roundId;
@@ -185,5 +186,30 @@ export const getGameById = async (id: string) => {
   } catch (error) {
     handleError(error)
     throw new Error("Failed to fetch game")
+  }
+}
+
+export const getGamesByGameId = async (gameId: string) => {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      throw new Error("User not authenticated")
+    }
+
+    if (!gameId) {
+      throw new Error("Game ID is required")
+    }
+
+    const games = await prisma.match.findUnique({
+      where: { id: gameId },
+      include: { tournament: true, round: true },
+    })
+
+    return games || null
+    console.log(games)
+  } catch (error) {
+    handleError(error)
+    throw new Error("Failed to fetch games")
   }
 }

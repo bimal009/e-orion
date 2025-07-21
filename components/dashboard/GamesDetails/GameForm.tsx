@@ -23,11 +23,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from 'sonner'
-import { useCreateRound, useUpdateRound } from '../api/useRound'  
 import { useGetMaps } from '../api/useMaps'
 import { useGetGroupsByRoundId } from '../api/useGroup'
 import { useCreateGame, useUpdateGame } from '../api/useGames'
-import { useGetPointsTable } from '../api/usePointsTable'
 
 // Zod validation schema
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -91,10 +89,6 @@ const gameSchema = z.object({
     required_error: 'Day is required',
   }).min(1, 'Day must be at least 1'),
 
-  pointsTableId: z
-    .string()
-    .min(1, 'Please select a points table'),
-
 })
 
 type GameFormData = z.infer<typeof gameSchema>
@@ -123,7 +117,6 @@ const GameForm = ({
   // Fetch data using hooks
   const { data: mapsData , isPending: isMapsPending } = useGetMaps()
   const { data: groupsData , isPending: isGroupsPending } = useGetGroupsByRoundId(roundId)
-  const { data: pointsTablesData, isPending: isPointsTablesPending } = useGetPointsTable(tournmentId)
   const { mutate, isPending } = type === 'edit' ? useUpdateGame() : useCreateGame()
 
   const {
@@ -145,7 +138,6 @@ const GameForm = ({
       endTime: '',
       groupId: '',
       day: 1,
-      pointsTableId: '',
     },
   })
 
@@ -167,7 +159,6 @@ const GameForm = ({
         endTime: '',
         groupId: '',
         day: 1,
-        pointsTableId: '',
       })
     }
   }, [initialData, reset])
@@ -181,7 +172,6 @@ const GameForm = ({
         // Convert time strings to Date objects
         startTime: timeStringToDate(data.startTime),
         endTime: data.endTime ? timeStringToDate(data.endTime) : undefined,
-        pointsTableId: data.pointsTableId,
         ...(type === 'edit' && initialData?.id ? { id: initialData.id } : {}),
         tournamentId: tournmentId,
         roundId: roundId,
@@ -217,8 +207,6 @@ const GameForm = ({
   
   // Extract groups array from the API response
   const groups = groupsData || []
-
-  const pointsTables = pointsTablesData || []
 
   return (
     <Dialog open={opened} onOpenChange={(open) => { if (!open) handleClose(); }}>
@@ -344,31 +332,6 @@ const GameForm = ({
               </div>
             </div>
 
-            {/* Points Table Row */}
-            <div className="space-y-2">
-              <Label htmlFor="pointsTableId" className="text-foreground">Points Table</Label>
-              <Select
-                value={watch('pointsTableId') || ''}
-                onValueChange={(value) => setValue('pointsTableId', value, { shouldValidate: true })}
-              >
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Select a points table" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pointsTables.map((pt) => (
-                    <SelectItem key={pt.id} value={pt.id}>
-                      {pt.pointTableName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.pointsTableId && (
-                <p className="text-sm font-medium text-destructive">
-                  {errors.pointsTableId.message}
-                </p>
-              )}
-            </div>
-
             {/* Third Row: Start and End Time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -419,7 +382,7 @@ const GameForm = ({
             </Button>
             <Button
               type="submit"
-                disabled={!isValid || isSubmitting || isMapsPending || isGroupsPending || isPointsTablesPending}
+                disabled={!isValid || isSubmitting || isMapsPending || isGroupsPending}
               className="flex-1 sm:flex-none sm:max-w-xs order-1 sm:order-2"
             >
               {isSubmitting || isMapsPending || isGroupsPending ? (

@@ -4,7 +4,7 @@ import { GroupCreateInput, RoundCreateInput } from "@/lib/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { createRound, deleteRound, getRounds, getRoundsWithSearch, updateRound } from "../actions/round.action"
-import { createGroup, updateGroup, getGroups, getGroupsWithSearch, getGroupById, deleteGroup, getGroupsByRoundId } from "../actions/group.actions"
+import { createGroup, updateGroup, getGroups, getGroupsWithSearch, getGroupById, deleteGroup, getGroupsByRoundId, getGroupsByGameId } from "../actions/group.actions"
 
 export const useGetRounds = (tournamentId: string) => {
     return useQuery({
@@ -45,6 +45,18 @@ export const useGetGroupsByRoundId = ( roundId: string) => {
         queryKey: ["groups", "round", roundId],
         queryFn: () => getGroupsByRoundId( roundId),
         enabled: !!roundId,
+        staleTime: 30 * 1000,
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+    })
+}
+
+export const useGetGroupsByGameId = (gameId: string) => {
+
+    return useQuery({
+        queryKey: ["groups", "game", gameId],
+        queryFn: () => getGroupsByGameId(gameId),
+        enabled: !!gameId,
         staleTime: 30 * 1000,
         refetchOnWindowFocus: true,
         refetchOnMount: true,

@@ -62,6 +62,7 @@ const TeamList = ({tournmentId}:{tournmentId:string}) => {
           <div className="flex items-center gap-2 ml-4">
             <Button onClick={() => router.push(`/dashboard/tournment/${tournmentId}`)} variant="outline" className="text-xl font-semibold bg-transparent hover:bg-transparent hover:text-primary cursor-pointer border-b-2 border-transparent">Rounds</Button>
             <Button onClick={() => router.push(`/dashboard/tournment/${tournmentId}/teams`)} variant="outline" className="text-xl font-semibold bg-transparent hover:bg-transparent hover:text-primary cursor-pointer border-b-2 border-primary text-primary">Teams</Button>
+            <Button onClick={() => router.push(`/dashboard/tournment/${tournmentId}/points-table`)} variant="outline" className="text-xl font-semibold bg-transparent hover:bg-transparent hover:text-primary cursor-pointer border-b-2 border-transparent">Points Table</Button>
           </div>
         </div>
         <div className="w-full sm:w-auto">

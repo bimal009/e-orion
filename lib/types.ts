@@ -84,6 +84,7 @@ export interface User {
   groupId?: string | null;
   group?: Group;
   teams?: Team[];
+  day?: number | null;
 }
   
   export interface Team {
@@ -150,6 +151,15 @@ export interface User {
     numberOfDays: number;
   };
 
+  export type PointTableCreateInput = {
+    id?: string;
+    tournamentId: string;
+    ranks: { rank: number; placementPoint: number }[];
+    killPoint: number;
+    pointTableName: string;
+  };
+     
+
   export type TeamCreateInput = {
     id?: string;
     name: string;
@@ -173,6 +183,7 @@ export interface User {
     startTime: Date;
     endTime?: Date;
     groupId?: string | null;
+    day?: number | null;
   };
 
   export type GroupCreateInput = {
@@ -194,4 +205,5 @@ export interface User {
     endTime?: Date;
     groupId?: string | null;
     tournamentId: string;
+    day?: number | null;
   };

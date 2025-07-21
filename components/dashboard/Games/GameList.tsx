@@ -95,7 +95,7 @@ const GameList = ({tournmentId,roundId}:{tournmentId:string,roundId:string}) => 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
            {gameList?.map((game: Match) => (
-                <GameCard key={game.id?.toString()} game={game} groups={(groups || []).map(g => ({ ...g, round: g.round ?? undefined }))} maps={maps || []} onEdit={handleEdit} />
+                <GameCard key={game.id?.toString()} game={game} groups={(groups || []).map(g => ({ ...g, round: g.round ?? undefined }))} maps={maps || []} onEdit={handleEdit} tournamentId={tournmentId} roundId={roundId} />
             ))}
         </div>
       )}

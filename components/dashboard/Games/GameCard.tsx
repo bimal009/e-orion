@@ -10,9 +10,11 @@ interface GameCardProps {
   onEdit?: (game: Match) => void
   groups: Group[]
   maps: Map[]
+  tournamentId: string
+  roundId: string
 }
 
-const GameCard = ({ game, onEdit, groups = [], maps = [] }: GameCardProps) => {
+const GameCard = ({ game, onEdit, groups = [], maps = [], tournamentId, roundId }: GameCardProps) => {
     const { mutate, isPending } = useDeleteGame()
     const handleDelete = (id: string) => {
         mutate(id)
@@ -40,7 +42,7 @@ const GameCard = ({ game, onEdit, groups = [], maps = [] }: GameCardProps) => {
     return (
       <div
         className="group bg-muted border border-border hover:border-primary hover:scale-[1.02] duration-300 transition-all rounded-2xl shadow-lg hover:shadow-2xl p-6 relative cursor-pointer overflow-hidden"
-        onClick={() => router.push(`/live/${game.id}`)}
+        onClick={() => router.push(`/dashboard/tournment/${tournamentId}/${roundId}/game/${game.id}`)}
       >
         {/* Background Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -139,7 +141,7 @@ const GameCard = ({ game, onEdit, groups = [], maps = [] }: GameCardProps) => {
               variant="default"
               size="lg"
               className="rounded-full px-6 flex items-center gap-2"
-              onClick={e => { e.stopPropagation(); router.push(`/live/${game.id}`) }}
+              onClick={e => { e.stopPropagation(); router.push(`/stream/${game.id}`) }}
             >
               <PlayCircle className="w-5 h-5 mr-2" /> Go Live
             </Button>

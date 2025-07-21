@@ -3,13 +3,24 @@
 import { GameCreateInput } from "@/lib/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { createGame, deleteGame, getGames, updateGame } from "../actions/games.actions"
+import { createGame, deleteGame, getGames, getGamesByGameId, updateGame } from "../actions/games.actions"
 
 export const useGetGames = (tournamentId: string,roundId:string) => {
     return useQuery({
         queryKey: ["games", tournamentId,roundId],
         queryFn: () => getGames(tournamentId,roundId),
         enabled: !!tournamentId && !!roundId,
+        staleTime: 30 * 1000, // 30 seconds
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+    })
+}
+
+    export const useGetGamesByGameId = (gameId: string) => {
+    return useQuery({
+        queryKey: ["games", gameId],
+        queryFn: () => getGamesByGameId(gameId),
+        enabled: !!gameId,
         staleTime: 30 * 1000, // 30 seconds
         refetchOnWindowFocus: true,
         refetchOnMount: true,
