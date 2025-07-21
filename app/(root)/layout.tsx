@@ -10,6 +10,7 @@ export default function DashboardLayout({
   return (
       <main className="min-h-screen bg-background">
         <Header />
+        
         {children}
         <Toaster />
         <Footer />

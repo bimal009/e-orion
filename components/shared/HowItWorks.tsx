@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, MonitorPlay, SignalHigh, ThumbsUp } from 'lucide-react';
+import MouseGlow from './MouseGlow';
 
 const HowItWorks = () => {
     const steps = [
@@ -27,6 +28,7 @@ const HowItWorks = () => {
 
     return (
         <section className="py-16 md:py-24">
+         
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
                     <p className="inline-block text-sm font-medium bg-primary/10 text-primary px-4 py-1.5 rounded-full mb-6">

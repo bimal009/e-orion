@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trophy, Bolt, Eye, Gamepad2 } from 'lucide-react';
+import MouseGlow from './MouseGlow';
 
 const Features = () => {
     const features = [
@@ -27,6 +28,7 @@ const Features = () => {
 
     return (
         <section className="py-16 md:py-24 relative overflow-hidden bg-background">
+            
             <div className="container mx-auto px-4 relative z-10">
                 {/* Header Section */}
                 <div className="text-center mb-16">
