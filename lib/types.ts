@@ -207,3 +207,7 @@ export interface User {
     tournamentId: string;
     day?: number | null;
   };
+
+  export type hello={
+    name:"hello"
+  }
