@@ -1,31 +1,32 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { X, Trophy } from 'lucide-react'
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { X, Trophy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { toast } from 'sonner'
-import { useGetMaps } from '../api/useMaps'
-import { useGetGroupsByRoundId } from '../api/useGroup'
-import { useCreateGame, useUpdateGame } from '../api/useGames'
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useGetMaps } from "../api/useMaps";
+import { useGetGroupsByRoundId } from "../api/useGroup";
+import { useCreateGame, useUpdateGame } from "../api/useGames";
+import type { Map, Group } from "@/lib/types";
 
 // Zod validation schema
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -40,84 +41,90 @@ function timeStringToDate(time: string): Date {
 
 // Helper to convert any value to 'HH:mm' string
 function toTimeString(val: any): string {
-  if (!val) return '';
-  if (typeof val === 'string') return val.slice(0, 5);
+  if (!val) return "";
+  if (typeof val === "string") return val.slice(0, 5);
   if (val instanceof Date) {
     return val.toTimeString().slice(0, 5);
   }
-  if (typeof val === 'number') {
+  if (typeof val === "number") {
     return new Date(val).toTimeString().slice(0, 5);
   }
-  return '';
+  return "";
 }
 
 const gameSchema = z.object({
-  matchNo: z.coerce.number({
-    invalid_type_error: 'Please enter a valid match number',
-    required_error: 'Match number is required',
-  }).min(1, 'Match number must be at least 1'),
-  
+  matchNo: z.coerce
+    .number({
+      invalid_type_error: "Please enter a valid match number",
+      required_error: "Match number is required",
+    })
+    .min(1, "Match number must be at least 1"),
+
   name: z
     .string()
-    .min(3, 'Game name must be at least 3 characters')
-    .max(50, 'Game name must be less than 50 characters')
-    .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Game name can only contain letters, numbers, spaces, hyphens, and underscores'),
-  
-  mapId: z
-    .string()
-    .min(1, 'Please select a map'),
-  
+    .min(3, "Game name must be at least 3 characters")
+    .max(50, "Game name must be less than 50 characters")
+    .regex(
+      /^[a-zA-Z0-9\s\-_]+$/,
+      "Game name can only contain letters, numbers, spaces, hyphens, and underscores"
+    ),
+
+  mapId: z.string().min(1, "Please select a map"),
+
   startTime: z
     .string()
-    .min(1, 'Start time is required')
-    .regex(timeRegex, 'Please enter a valid start time (HH:mm)'),
-    
+    .min(1, "Start time is required")
+    .regex(timeRegex, "Please enter a valid start time (HH:mm)"),
+
   endTime: z
     .string()
     .optional()
     .refine((val) => {
-      if (!val) return true
-      return timeRegex.test(val)
-    }, 'Please enter a valid end time (HH:mm)'),
-    
-  groupId: z
-    .string()
-    .min(1, 'Please select a group'),
+      if (!val) return true;
+      return timeRegex.test(val);
+    }, "Please enter a valid end time (HH:mm)"),
 
-  day: z.coerce.number({
-    invalid_type_error: 'Please enter a valid day',
-    required_error: 'Day is required',
-  }).min(1, 'Day must be at least 1'),
+  groupId: z.string().min(1, "Please select a group"),
 
-})
+  day: z.coerce
+    .number({
+      invalid_type_error: "Please enter a valid day",
+      required_error: "Day is required",
+    })
+    .min(1, "Day must be at least 1"),
 
-type GameFormData = z.infer<typeof gameSchema>
+  pointsTableId: z.string().optional(),
+});
+
+type GameFormData = z.infer<typeof gameSchema>;
 
 type GameFormProps = {
-  opened: boolean
-  onClose?: () => void
-  onSubmit?: (data: GameFormData) => void
-  type: 'create' | 'edit'
-  initialData?: any
-  tournmentId: string
-  roundId: string
-}
+  opened: boolean;
+  onClose?: () => void;
+  onSubmit?: (data: GameFormData) => void;
+  type: "create" | "edit";
+  initialData?: any;
+  tournmentId: string;
+  roundId: string;
+};
 
-const GameForm = ({ 
-  opened, 
-  onClose, 
-  onSubmit, 
-  type, 
-  initialData, 
-  tournmentId, 
-  roundId
+const GameForm = ({
+  opened,
+  onClose,
+  onSubmit,
+  type,
+  initialData,
+  tournmentId,
+  roundId,
 }: GameFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch data using hooks
-  const { data: mapsData , isPending: isMapsPending } = useGetMaps()
-  const { data: groupsData , isPending: isGroupsPending } = useGetGroupsByRoundId(roundId)
-  const { mutate, isPending } = type === 'edit' ? useUpdateGame() : useCreateGame()
+  const { data: mapsData, isPending: isMapsPending } = useGetMaps();
+  const { data: groupsData, isPending: isGroupsPending } =
+    useGetGroupsByRoundId(roundId);
+  const { mutate, isPending } =
+    type === "edit" ? useUpdateGame() : useCreateGame();
 
   const {
     register,
@@ -126,20 +133,21 @@ const GameForm = ({
     reset,
     setValue,
     watch,
-    control
+    control,
   } = useForm<GameFormData>({
     resolver: zodResolver(gameSchema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: initialData || {
       matchNo: 1,
-      name: '',
-      mapId: '',
-      startTime: '',
-      endTime: '',
-      groupId: '',
+      name: "",
+      mapId: "",
+      startTime: "",
+      endTime: "",
+      groupId: "",
       day: 1,
+      pointsTableId: "",
     },
-  })
+  });
 
   React.useEffect(() => {
     if (initialData) {
@@ -148,78 +156,86 @@ const GameForm = ({
         startTime: toTimeString(initialData.startTime),
         endTime: toTimeString(initialData.endTime),
         day: initialData.day ?? 1,
-      }
-      reset(formattedData)
+      };
+      reset(formattedData);
     } else {
       reset({
         matchNo: 1,
-        name: '',
-        mapId: '',
-        startTime: '',
-        endTime: '',
-        groupId: '',
+        name: "",
+        mapId: "",
+        startTime: "",
+        endTime: "",
+        groupId: "",
         day: 1,
-      })
+        pointsTableId: "",
+      });
     }
-  }, [initialData, reset])
+  }, [initialData, reset]);
 
   const onFormSubmit = async (data: GameFormData) => {
-    setIsSubmitting(true)
-    
+    setIsSubmitting(true);
+
     try {
       const formData = {
         ...data,
-        // Convert time strings to Date objects
         startTime: timeStringToDate(data.startTime),
         endTime: data.endTime ? timeStringToDate(data.endTime) : undefined,
-        ...(type === 'edit' && initialData?.id ? { id: initialData.id } : {}),
+        ...(type === "edit" && initialData?.id ? { id: initialData.id } : {}),
         tournamentId: tournmentId,
         roundId: roundId,
         day: data.day,
-      }
-      
-      console.log('Game created:', formData)
-      mutate(formData)
-      
-      reset()
-      onClose?.()
+        pointsTableId: data.pointsTableId || "",
+      };
+
+      mutate(formData);
+
+      reset();
+      onClose?.();
 
       toast.success(
-        type === 'edit' ? "Game updated successfully" : "Game created successfully",
-      )
+        type === "edit"
+          ? "Game updated successfully"
+          : "Game created successfully"
+      );
     } catch (error) {
-      console.error('Error creating game:', error)
       toast.error(
-        type === 'edit' ? "Failed to update game" : "Failed to create game",
-      )
+        type === "edit" ? "Failed to update game" : "Failed to create game"
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleClose = () => {
-    reset()
-    onClose?.()
-  }
+    reset();
+    onClose?.();
+  };
 
-  // Extract maps array from the API response
-  const maps = mapsData || []
-  
-  // Extract groups array from the API response
-  const groups = groupsData || []
+  const maps = mapsData || [];
+
+  const groups = groupsData || [];
 
   return (
-    <Dialog open={opened} onOpenChange={(open) => { if (!open) handleClose(); }}>
+    <Dialog
+      open={opened}
+      onOpenChange={(open) => {
+        if (!open) handleClose();
+      }}
+    >
       <DialogContent className="sm:max-w-3xl max-w-[95vw] rounded-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="bg-primary p-2 rounded-lg">
               <Trophy className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-foreground">{type === 'edit' ? 'Edit Game' : 'Create New Game'}</span>
+            <span className="text-foreground">
+              {type === "edit" ? "Edit Game" : "Create New Game"}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {type === 'edit' ? 'Update the details below to edit the game.' : 'Fill in the details below to create a new game.'}
+            {type === "edit"
+              ? "Update the details below to edit the game."
+              : "Fill in the details below to create a new game."}
           </DialogDescription>
         </DialogHeader>
 
@@ -228,9 +244,11 @@ const GameForm = ({
             {/* First Row: Match Number and Game Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="matchNo" className="text-foreground">Match Number</Label>
+                <Label htmlFor="matchNo" className="text-foreground">
+                  Match Number
+                </Label>
                 <Input
-                  {...register('matchNo', { valueAsNumber: true })}
+                  {...register("matchNo", { valueAsNumber: true })}
                   type="number"
                   id="matchNo"
                   placeholder="Enter match number"
@@ -245,9 +263,11 @@ const GameForm = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-foreground">Game Name</Label>
+                <Label htmlFor="name" className="text-foreground">
+                  Game Name
+                </Label>
                 <Input
-                  {...register('name')}
+                  {...register("name")}
                   type="text"
                   id="name"
                   placeholder="Enter game name"
@@ -264,9 +284,11 @@ const GameForm = ({
             {/* Day No Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="day" className="text-foreground">day</Label>
+                <Label htmlFor="day" className="text-foreground">
+                  day
+                </Label>
                 <Input
-                  {...register('day', { valueAsNumber: true })}
+                  {...register("day", { valueAsNumber: true })}
                   type="number"
                   id="day"
                   placeholder="Enter day"
@@ -284,16 +306,20 @@ const GameForm = ({
             {/* Second Row: Map Selection and Group */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="mapId" className="text-foreground">Map</Label>
+                <Label htmlFor="mapId" className="text-foreground">
+                  Map
+                </Label>
                 <Select
-                  value={watch('mapId') || ''}
-                  onValueChange={(value) => setValue('mapId', value, { shouldValidate: true })}
+                  value={watch("mapId") || ""}
+                  onValueChange={(value) =>
+                    setValue("mapId", value, { shouldValidate: true })
+                  }
                 >
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Select a map" />
                   </SelectTrigger>
                   <SelectContent>
-                    {maps.map((map) => (
+                    {maps.map((map: Map) => (
                       <SelectItem key={map.id} value={map.id}>
                         {map.name}
                       </SelectItem>
@@ -308,10 +334,14 @@ const GameForm = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="groupId" className="text-foreground">Group</Label>
+                <Label htmlFor="groupId" className="text-foreground">
+                  Group
+                </Label>
                 <Select
-                  value={watch('groupId') || ''}
-                  onValueChange={(value) => setValue('groupId', value, { shouldValidate: true })}
+                  value={watch("groupId") || ""}
+                  onValueChange={(value) =>
+                    setValue("groupId", value, { shouldValidate: true })
+                  }
                 >
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Select a group" />
@@ -335,9 +365,11 @@ const GameForm = ({
             {/* Third Row: Start and End Time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startTime" className="text-foreground">Start Time</Label>
+                <Label htmlFor="startTime" className="text-foreground">
+                  Start Time
+                </Label>
                 <Input
-                  {...register('startTime')}
+                  {...register("startTime")}
                   type="time"
                   id="startTime"
                   className="bg-background"
@@ -350,9 +382,11 @@ const GameForm = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="endTime" className="text-foreground">End Time (Optional)</Label>
+                <Label htmlFor="endTime" className="text-foreground">
+                  End Time (Optional)
+                </Label>
                 <Input
-                  {...register('endTime')}
+                  {...register("endTime")}
                   type="time"
                   id="endTime"
                   className="bg-background"
@@ -364,10 +398,6 @@ const GameForm = ({
                 )}
               </div>
             </div>
-
-
-
-
           </div>
 
           {/* Action Buttons */}
@@ -382,23 +412,27 @@ const GameForm = ({
             </Button>
             <Button
               type="submit"
-                disabled={!isValid || isSubmitting || isMapsPending || isGroupsPending}
+              disabled={
+                !isValid || isSubmitting || isMapsPending || isGroupsPending
+              }
               className="flex-1 sm:flex-none sm:max-w-xs order-1 sm:order-2"
             >
               {isSubmitting || isMapsPending || isGroupsPending ? (
                 <>
                   <span className="animate-spin mr-2">↻</span>
-                  {type === 'edit' ? 'Updating...' : 'Creating...'}
+                  {type === "edit" ? "Updating..." : "Creating..."}
                 </>
+              ) : type === "edit" ? (
+                "Update Game"
               ) : (
-                type === 'edit' ? 'Update Game' : 'Create Game'
+                "Create Game"
               )}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default GameForm
+export default GameForm;

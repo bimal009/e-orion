@@ -134,6 +134,18 @@ export interface Map {
   matches?: Match[];
 }
 
+export interface PointsTable {
+  id: string;
+  pointTableName: string;
+  tournamentId: string;
+  ranks: { rank: number; placementPoint: number }[];
+  killPoint: number;
+  createdAt: Date;
+  updatedAt: Date;
+  pubgResults?: any[];
+  matches?: any[];
+}
+
 
 export type TournamentCreateInput = {
   name: string;
@@ -206,4 +218,5 @@ export type GameCreateInput = {
   groupId?: string | null;
   tournamentId: string;
   day?: number | null;
+  pointsTableId?: string | null;
 };

@@ -1,24 +1,30 @@
-"use client"
+"use client";
 
-import { useParams, useRouter } from 'next/navigation'
-import { useGetGroupById } from '@/components/dashboard/api/useGroup'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { 
-  ArrowLeft, 
-  Users, 
-  Trophy, 
-  Calendar, 
-  MapPin, 
-  Clock, 
-  User, 
-  Phone, 
-  Mail, 
-  Gamepad2, 
+import { useParams, useRouter } from "next/navigation";
+import { useGetGroupById } from "@/components/dashboard/api/useGroup";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  ArrowLeft,
+  Users,
+  Trophy,
+  Calendar,
+  MapPin,
+  Clock,
+  User,
+  Phone,
+  Mail,
+  Gamepad2,
   Target,
   Medal,
   Star,
@@ -28,27 +34,36 @@ import {
   Zap,
   Crown,
   Flag,
-  Hash
-} from 'lucide-react'
-import { FullScreenLoader } from '@/components/shared/Loader'
-import Image from 'next/image'
+  Hash,
+} from "lucide-react";
+import { FullScreenLoader } from "@/components/shared/Loader";
+import Image from "next/image";
+import type { Team } from "@/lib/types";
+import type { Match } from "@/lib/types";
 
 export default function GroupDetailsPage() {
-  const params = useParams()
-  const router = useRouter()
-  const groupId = params.gid as string
-  const tournamentId = params.id as string
-  const roundId = params.rid as string
-  console.log(tournamentId, "tournamentId", roundId, "roundId", groupId, "groupId")
+  const params = useParams();
+  const router = useRouter();
+  const groupId = params.gid as string;
+  const tournamentId = params.id as string;
+  const roundId = params.rid as string;
+  console.log(
+    tournamentId,
+    "tournamentId",
+    roundId,
+    "roundId",
+    groupId,
+    "groupId"
+  );
 
-  const { data: group, isLoading, error } = useGetGroupById(groupId)
+  const { data: group, isLoading, error } = useGetGroupById(groupId);
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <FullScreenLoader />
       </div>
-    )
+    );
   }
 
   if (error || !group) {
@@ -72,11 +87,11 @@ export default function GroupDetailsPage() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
-  const teams = group.teams || []
-  const matches = group.matches || []
+  const teams = group.teams || [];
+  const matches = group.matches || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -95,7 +110,9 @@ export default function GroupDetailsPage() {
                 Back
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">{group.name}</h1>
+                <h1 className="text-2xl font-bold text-foreground">
+                  {group.name}
+                </h1>
                 <p className="text-sm text-muted-foreground">Group Details</p>
               </div>
             </div>
@@ -117,8 +134,12 @@ export default function GroupDetailsPage() {
                   <Users className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Teams</p>
-                  <p className="text-2xl font-bold text-foreground">{teams.length}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Teams
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {teams.length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -131,8 +152,12 @@ export default function GroupDetailsPage() {
                   <Trophy className="w-6 h-6 text-secondary" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Matches</p>
-                  <p className="text-2xl font-bold text-foreground">{matches.length}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Matches
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {matches.length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -145,9 +170,11 @@ export default function GroupDetailsPage() {
                   <Activity className="w-6 h-6 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Teams</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Active Teams
+                  </p>
                   <p className="text-2xl font-bold text-foreground">
-                    {teams.filter(team => team.isSelected).length}
+                    {teams.filter((team: Team) => team.isSelected).length}
                   </p>
                 </div>
               </div>
@@ -161,9 +188,15 @@ export default function GroupDetailsPage() {
                   <Clock className="w-6 h-6 text-orange-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Upcoming Matches</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Upcoming Matches
+                  </p>
                   <p className="text-2xl font-bold text-foreground">
-                    {matches.filter(match => new Date(match.startTime) > new Date()).length}
+                    {
+                      matches.filter(
+                        (match: Match) => new Date(match.startTime) > new Date()
+                      ).length
+                    }
                   </p>
                 </div>
               </div>
@@ -189,19 +222,24 @@ export default function GroupDetailsPage() {
                   <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                     <Users className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <p className="text-muted-foreground">No teams assigned to this group yet</p>
+                  <p className="text-muted-foreground">
+                    No teams assigned to this group yet
+                  </p>
                 </div>
               ) : (
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-3">
-                    {teams.map((team, index) => (
+                    {teams.map((team: Team, index: number) => (
                       <div
                         key={team.id}
                         className="flex items-center space-x-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                       >
                         <div className="flex items-center space-x-3 flex-1 min-w-0">
                           <Avatar className="w-12 h-12">
-                            <AvatarImage src={team.logo || ''} alt={team.name} />
+                            <AvatarImage
+                              src={team.logo || ""}
+                              alt={team.name}
+                            />
                             <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                               {team.name.charAt(0).toUpperCase()}
                             </AvatarFallback>
@@ -278,12 +316,14 @@ export default function GroupDetailsPage() {
                   <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                     <Trophy className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <p className="text-muted-foreground">No matches scheduled for this group yet</p>
+                  <p className="text-muted-foreground">
+                    No matches scheduled for this group yet
+                  </p>
                 </div>
               ) : (
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-3">
-                    {matches.map((match) => (
+                    {matches.map((match: Match) => (
                       <div
                         key={match.id}
                         className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
@@ -297,14 +337,20 @@ export default function GroupDetailsPage() {
                               Match #{match.matchNo}
                             </p>
                           </div>
-                          <Badge 
-                            variant={new Date(match.startTime) > new Date() ? "default" : "secondary"}
+                          <Badge
+                            variant={
+                              new Date(match.startTime) > new Date()
+                                ? "default"
+                                : "secondary"
+                            }
                             className="text-xs"
                           >
-                            {new Date(match.startTime) > new Date() ? "Upcoming" : "Completed"}
+                            {new Date(match.startTime) > new Date()
+                              ? "Upcoming"
+                              : "Completed"}
                           </Badge>
                         </div>
-                        
+
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center space-x-2 text-muted-foreground">
                             <Calendar className="w-4 h-4" />
@@ -315,10 +361,13 @@ export default function GroupDetailsPage() {
                           <div className="flex items-center space-x-2 text-muted-foreground">
                             <Clock className="w-4 h-4" />
                             <span>
-                              {new Date(match.startTime).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                              {new Date(match.startTime).toLocaleTimeString(
+                                [],
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
                             </span>
                           </div>
                           {match.mapId && (
@@ -334,10 +383,14 @@ export default function GroupDetailsPage() {
                             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                               <Clock className="w-4 h-4" />
                               <span>
-                                Ended: {new Date(match.endTime).toLocaleTimeString([], {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
+                                Ended:{" "}
+                                {new Date(match.endTime).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
                               </span>
                             </div>
                           </div>
@@ -378,7 +431,9 @@ export default function GroupDetailsPage() {
                     )}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground">{group.tournament.name}</h4>
+                    <h4 className="font-semibold text-foreground">
+                      {group.tournament.name}
+                    </h4>
                     <p className="text-sm text-muted-foreground">Tournament</p>
                   </div>
                 </div>
@@ -388,32 +443,44 @@ export default function GroupDetailsPage() {
                     <Calendar className="w-4 h-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Created:</span>
                     <span className="font-medium">
-                      {group.tournament.createdAt && new Date(group.tournament.createdAt).toLocaleDateString()}
+                      {group.tournament.createdAt &&
+                        new Date(
+                          group.tournament.createdAt
+                        ).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-sm">
                     <TrendingUp className="w-4 h-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Updated:</span>
                     <span className="font-medium">
-                      {group.tournament.updatedAt && new Date(group.tournament.updatedAt).toLocaleDateString()}
+                      {group.tournament.updatedAt &&
+                        new Date(
+                          group.tournament.updatedAt
+                        ).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <div 
+                    <div
                       className="w-4 h-4 rounded-full border-2"
                       style={{ backgroundColor: group.tournament.primaryColor }}
                     />
-                    <span className="text-sm text-muted-foreground">Primary Color</span>
+                    <span className="text-sm text-muted-foreground">
+                      Primary Color
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div 
+                    <div
                       className="w-4 h-4 rounded-full border-2"
-                      style={{ backgroundColor: group.tournament.secondaryColor }}
+                      style={{
+                        backgroundColor: group.tournament.secondaryColor,
+                      }}
                     />
-                    <span className="text-sm text-muted-foreground">Secondary Color</span>
+                    <span className="text-sm text-muted-foreground">
+                      Secondary Color
+                    </span>
                   </div>
                 </div>
               </div>
@@ -423,22 +490,26 @@ export default function GroupDetailsPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            onClick={() => router.push(`/dashboard/tournment/${tournamentId}/teams`)}
+          <Button
+            onClick={() =>
+              router.push(`/dashboard/tournment/${tournamentId}/teams`)
+            }
             className="flex-1 sm:flex-none"
           >
             <Users className="w-4 h-4 mr-2" />
             Manage Teams
           </Button>
-          <Button 
+          <Button
             variant="outline"
-            onClick={() => router.push(`/dashboard/tournment/${tournamentId}/${roundId}`)}
+            onClick={() =>
+              router.push(`/dashboard/tournment/${tournamentId}/${roundId}`)
+            }
             className="flex-1 sm:flex-none"
           >
             <Trophy className="w-4 h-4 mr-2" />
             View Round
           </Button>
-          <Button 
+          <Button
             variant="outline"
             onClick={() => router.push(`/dashboard/tournment/${tournamentId}`)}
             className="flex-1 sm:flex-none"
@@ -449,5 +520,5 @@ export default function GroupDetailsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

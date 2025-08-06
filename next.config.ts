@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  eslint:{
-    ignoreDuringBuilds:true
+  eslint: {
+    ignoreDuringBuilds: true
   },
   images: {
     remotePatterns: [
@@ -19,7 +19,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'source.unsplash.com',
       },
-    
+      {
+        protocol: 'https',
+        hostname: 'avatar.iran.liara.run',
+      },
     ],
   }
 };

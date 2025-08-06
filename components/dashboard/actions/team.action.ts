@@ -121,7 +121,7 @@ export const getTeams = async (tournmentId: string) => {
 
     const teams = await prisma.team.findMany({
       where: { tournamentId: tournmentId },
-      include: { tournament: true, players: true , round: true},
+      include: { tournament: true, players: true, round: true },
       orderBy: { id: 'asc' },
     })
     return teams || []
@@ -246,7 +246,7 @@ export const getTeamById = async (id: string) => {
     }
     const team = await prisma.team.findUnique({
       where: { id },
-      include: { tournament: true, players: true, round: true },
+      include: { tournament: true, players: true, round: true, group: true },
     })
     if (!team) throw new Error("Team not found")
     return team

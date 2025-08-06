@@ -7,14 +7,15 @@ datasource db {
   provider = "mongodb"
   url      = env("MONGODB_URI")
 }
+
 model User {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
-  email         String     @unique
+  email         String       @unique
   emailVerified DateTime?
   image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   tournaments   Tournament[]
   accounts      Account[]
   sessions      Session[]
@@ -53,22 +54,24 @@ model Session {
 }
 
 model Tournament {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  logo      String
-  ownerId   String   @db.ObjectId
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  rounds    Round[] @relation("TournamentRounds")
-  groups    Group[] @relation("TournamentGroups")
-  teams     Team[] @relation("TournamentTeams")
-  matches   Match[] @relation("TournamentMatches")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  primaryColor String
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  logo           String
+  ownerId        String        @db.ObjectId
+  owner          User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  rounds         Round[]       @relation("TournamentRounds")
+  groups         Group[]       @relation("TournamentGroups")
+  teams          Team[]        @relation("TournamentTeams")
+  matches        Match[]       @relation("TournamentMatches")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  primaryColor   String
   secondaryColor String
-  textColor1 String
-  textColor2 String
-  pointsTable PointsTable[]
+  textColor1     String
+  textColor2     String
+  pointsTable    PointsTable[]
+  results        ResultEntry[]
+
   @@map("tournaments")
 }
 
@@ -79,86 +82,97 @@ model Round {
   tournament   Tournament @relation("TournamentRounds", fields: [tournamentId], references: [id], onDelete: Cascade)
   matches      Match[]
   teams        Team[]
-  groups       Group[] @relation("RoundGroups")
-  numberOfDays Int @default(0)
-
+  groups       Group[]    @relation("RoundGroups")
+  numberOfDays Int        @default(0)
 
   @@map("rounds")
 }
 
 model Match {
-  id        String       @id @default(auto()) @map("_id") @db.ObjectId
-  matchNo   Int
-  name      String
-  roundId   String       @db.ObjectId
-  mapId     String       @db.ObjectId
-  round     Round        @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  map       Map          @relation(fields: [mapId], references: [id])
-  startTime DateTime
-  endTime   DateTime?
-  tournamentId String   @db.ObjectId
-  groupId   String?      @db.ObjectId
-  group     Group?       @relation(fields: [groupId], references: [id])
-  tournament Tournament @relation("TournamentMatches", fields: [tournamentId], references: [id], onDelete: Cascade)
-  day       Int?
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  matchNo       Int
+  name          String
+  roundId       String        @db.ObjectId
+  mapId         String        @db.ObjectId
+  round         Round         @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  map           Map           @relation(fields: [mapId], references: [id])
+  startTime     DateTime
+  endTime       DateTime?
+  tournamentId  String        @db.ObjectId
+  groupId       String?       @db.ObjectId
+  group         Group?        @relation(fields: [groupId], references: [id])
+  tournament    Tournament    @relation("TournamentMatches", fields: [tournamentId], references: [id], onDelete: Cascade)
+  day           Int?
+  PubgResult    PubgResult[]
+  playerKills   PlayerKills[] @relation("MatchPlayerKills")
+  pointsTableId String?       @db.ObjectId
+  pointsTable   PointsTable?  @relation(fields: [pointsTableId], references: [id])
+
   @@map("matches")
 }
 
 model Team {
-  id        String       @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  teamTag   String? @default("")
-  logo      String?
-  email     String?
-  phone     String? 
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  teamTag String? @default("")
+  logo    String?
+  email   String?
+  phone   String?
 
-  players   Player[]
-  groupId   String?      @db.ObjectId
-  group     Group?       @relation(fields: [groupId], references: [id])
-  tournamentId String   @db.ObjectId
-  tournament   Tournament @relation("TournamentTeams", fields: [tournamentId], references: [id], onDelete: Cascade)
-  roundId String?   @db.ObjectId
-  round   Round?    @relation(fields: [roundId], references: [id], onDelete: SetNull)
-  isSelected Boolean @default(false)
+  players      Player[]
+  groupId      String?       @db.ObjectId
+  group        Group?        @relation(fields: [groupId], references: [id])
+  tournamentId String        @db.ObjectId
+  tournament   Tournament    @relation("TournamentTeams", fields: [tournamentId], references: [id], onDelete: Cascade)
+  roundId      String?       @db.ObjectId
+  round        Round?        @relation(fields: [roundId], references: [id], onDelete: SetNull)
+  isSelected   Boolean       @default(false)
+  PubgResult   PubgResult[]
+  playerKills  PlayerKills[] @relation("TeamPlayerKills")
+  isEliminated Boolean       @default(false)
+
   @@map("teams")
 }
 
 model Player {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  name    String
-  ign     String
-  role    String?
-  teamId  String  @db.ObjectId
-  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  image   String? @default("")
-  email   String?
-  phone   String?
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  ign          String
+  role         String?
+  teamId       String        @db.ObjectId
+  team         Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  image        String?       @default("")
+  email        String?
+  phone        String?
+  playerKills  PlayerKills[] @relation("PlayerMatchKills")
+  kills        Int           @default(0)
+  isEliminated Boolean       @default(false)
+
   @@map("players")
 }
 
 model Group {
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
   name         String
-  tournamentId String      @db.ObjectId
-  tournament   Tournament  @relation("TournamentGroups", fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentId String       @db.ObjectId
+  tournament   Tournament   @relation("TournamentGroups", fields: [tournamentId], references: [id], onDelete: Cascade)
   teams        Team[]
   matches      Match[]
   roundId      String?      @db.ObjectId
   round        Round?       @relation("RoundGroups", fields: [roundId], references: [id], onDelete: Cascade)
+  pubgResults  PubgResult[]
+
   @@map("groups")
 }
 
 model Map {
-  id     String   @id @default(auto()) @map("_id") @db.ObjectId
-  name   String   @unique
-  matches Match[]
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String  @unique
+  matches  Match[]
   mapImage String?
 
   @@map("maps")
 }
-
-
-
 
 model VerificationToken {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -170,19 +184,17 @@ model VerificationToken {
   @@map("verificationtokens")
 }
 
-
-
-
-
 model PointsTable {
-  pointTableName String @default("Point Table")
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  tournamentId  String   @db.ObjectId
-  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  ranks         RankEntry[]
-  killPoint     Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  pointTableName String       @default("Point Table")
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  tournamentId   String       @db.ObjectId
+  tournament     Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  ranks          RankEntry[]
+  killPoint      Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  pubgResults    PubgResult[]
+  matches        Match[]
 
   @@map("points_table")
 }
@@ -190,4 +202,62 @@ model PointsTable {
 type RankEntry {
   rank           Int
   placementPoint Int
+}
+
+type ResultEntry {
+  teamId        String
+  teamName      String
+  totalKills    Int     @default(0)
+  totalPoints   Int     @default(0)
+  matchesPlayed Int     @default(0)
+  position      Int     @default(0)
+  eliminated    Boolean @default(false)
+  eliminatedAt  Int?
+}
+
+model PubgResult {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  matchId       String        @db.ObjectId
+  teamId        String        @db.ObjectId
+  pointsTableId String        @db.ObjectId
+  groupId       String?       @db.ObjectId
+  totalKills    Int
+  placement     Int
+  points        Int           @default(0)
+  resultEntry   ResultEntry[]
+  playerKills   PlayerKills[] @relation("ResultPlayerKills")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  match       Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  team        Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  pointsTable PointsTable @relation(fields: [pointsTableId], references: [id], onDelete: Cascade)
+  group       Group?      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, teamId])
+  @@map("pubg_results")
+}
+
+model PlayerKills {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  playerId     String   @db.ObjectId
+  matchId      String   @db.ObjectId
+  teamId       String   @db.ObjectId
+  pubgResultId String   @db.ObjectId
+  kills        Int      @default(0)
+  damage       Int      @default(0)
+  assists      Int      @default(0)
+  placement    Int?
+  survived     Boolean  @default(false)
+  eliminatedAt Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  player     Player     @relation("PlayerMatchKills", fields: [playerId], references: [id], onDelete: Cascade)
+  match      Match      @relation("MatchPlayerKills", fields: [matchId], references: [id], onDelete: Cascade)
+  team       Team       @relation("TeamPlayerKills", fields: [teamId], references: [id], onDelete: Cascade)
+  pubgResult PubgResult @relation("ResultPlayerKills", fields: [pubgResultId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, matchId])
+  @@map("player_kills")
 }

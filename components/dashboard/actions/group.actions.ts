@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { GroupCreateInput, MatchCreateInput, TeamCreateInput } from "@/lib/types"
 import { handleError } from "@/lib/utils"
 import { getServerSession } from "next-auth"
+import type { Team } from '@/lib/types';
 
 export const createGroup = async (data: GroupCreateInput) => {
   try {
@@ -30,7 +31,7 @@ export const createGroup = async (data: GroupCreateInput) => {
       },
     })
 
-    // Update isSelected field for connected teams
+
     if (data.teams && data.teams.length > 0) {
       await prisma.team.updateMany({
         where: {
@@ -40,6 +41,38 @@ export const createGroup = async (data: GroupCreateInput) => {
           isSelected: true
         }
       })
+
+      const matches = await prisma.match.findMany({
+        where: { groupId: group.id }
+      })
+
+      const pointsTable = await prisma.pointsTable.findFirst({
+        where: { tournamentId: data.tournamentId }
+      })
+
+      if (matches.length > 0 && pointsTable) {
+        const resultEntries = []
+
+        for (const team of data.teams) {
+          for (const match of matches) {
+            resultEntries.push({
+              matchId: match.id,
+              teamId: team.id,
+              pointsTableId: pointsTable.id,
+              groupId: group.id,
+              totalKills: 0,
+              placement: 0,
+              points: 0
+            })
+          }
+        }
+
+        if (resultEntries.length > 0) {
+          await prisma.pubgResult.createMany({
+            data: resultEntries
+          })
+        }
+      }
     }
 
     return group
@@ -57,7 +90,6 @@ export const updateGroup = async (id: string, data: GroupCreateInput) => {
       throw new Error("User not authenticated")
     }
 
-    // Get current teams in the group
     const currentGroup = await prisma.group.findUnique({
       where: { id },
       include: { teams: true }
@@ -67,22 +99,30 @@ export const updateGroup = async (id: string, data: GroupCreateInput) => {
       throw new Error("Group not found")
     }
 
-    const currentTeamIds = currentGroup.teams.map(team => team.id)
+    const currentTeamIds = currentGroup.teams.map((team: Team) => team.id)
     const newTeamIds = data.teams?.map(team => team.id) || []
 
     // Find teams to remove (in current but not in new selection)
-    const teamsToRemove = currentTeamIds.filter(id => !newTeamIds.includes(id))
-    
+    const teamsToRemove = currentTeamIds.filter((id: string) => !newTeamIds.includes(id))
+
     // Find teams to add (in new selection but not in current)
-    const teamsToAdd = newTeamIds.filter(id => !currentTeamIds.includes(id))
+    const teamsToAdd = newTeamIds.filter((id: string) => !currentTeamIds.includes(id))
 
     // Remove teams that are no longer selected
     if (teamsToRemove.length > 0) {
       await prisma.team.updateMany({
         where: { id: { in: teamsToRemove } },
-        data: { 
+        data: {
           groupId: null,
-          isSelected: false 
+          isSelected: false
+        }
+      })
+
+      // Remove PubgResult entries for teams removed from the group
+      await prisma.pubgResult.deleteMany({
+        where: {
+          groupId: id,
+          teamId: { in: teamsToRemove }
         }
       })
     }
@@ -91,11 +131,44 @@ export const updateGroup = async (id: string, data: GroupCreateInput) => {
     if (teamsToAdd.length > 0) {
       await prisma.team.updateMany({
         where: { id: { in: teamsToAdd } },
-        data: { 
+        data: {
           groupId: id,
-          isSelected: true 
+          isSelected: true
         }
       })
+
+      // Create PubgResult entries for newly added teams
+      const matches = await prisma.match.findMany({
+        where: { groupId: id }
+      })
+
+      const pointsTable = await prisma.pointsTable.findFirst({
+        where: { tournamentId: data.tournamentId }
+      })
+
+      if (matches.length > 0 && pointsTable) {
+        const resultEntries = []
+
+        for (const teamId of teamsToAdd) {
+          for (const match of matches) {
+            resultEntries.push({
+              matchId: match.id,
+              teamId: teamId,
+              pointsTableId: pointsTable.id,
+              groupId: id,
+              totalKills: 0,
+              placement: 0,
+              points: 0
+            })
+          }
+        }
+
+        if (resultEntries.length > 0) {
+          await prisma.pubgResult.createMany({
+            data: resultEntries
+          })
+        }
+      }
     }
 
     const group = await prisma.group.update({
@@ -135,7 +208,7 @@ export const getGroups = async (tournamentId: string) => {
       where: { tournamentId },
       include: {
         tournament: true,
-        teams: { include: { players: true , tournament: true } },
+        teams: { include: { players: true, tournament: true } },
         matches: true,
       },
       orderBy: { id: 'asc' },
@@ -196,10 +269,15 @@ export const deleteGroup = async (groupId: string) => {
     // First, set isSelected to false for all teams in this group
     await prisma.team.updateMany({
       where: { groupId },
-      data: { 
+      data: {
         groupId: null,
-        isSelected: false 
+        isSelected: false
       }
+    })
+
+    // Delete PubgResult entries for this group
+    await prisma.pubgResult.deleteMany({
+      where: { groupId }
     })
 
     await prisma.match.deleteMany({ where: { groupId } })
@@ -212,7 +290,7 @@ export const deleteGroup = async (groupId: string) => {
       },
     })
 
-      return deletedGroup
+    return deletedGroup
   } catch (error) {
     handleError(error)
     throw new Error("Failed to delete group")
@@ -273,8 +351,9 @@ export const getGroupsByGameId = async (gameId: string) => {
       where: { matches: { some: { id: gameId } } },
       include: {
         tournament: true,
-        teams: { include: { players: true } },
+        teams: true,
         matches: true,
+        round: true,
       },
     })
     return groups || []

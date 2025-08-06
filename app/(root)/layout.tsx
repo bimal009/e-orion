@@ -8,13 +8,12 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-      <main className="min-h-screen bg-background">
-        <Header />
-        
-        {children}
-        <Toaster />
-        <Footer />
-      </main>
+    <main className="min-h-screen bg-background">
+      <Header />
+
+      {children}
+      <Toaster />
+    </main>
   );
 }
 

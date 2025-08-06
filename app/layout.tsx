@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 
-
 import SessionWrapper from "@/lib/providers/SessionWrapper";
 import Providers from "@/lib/providers/QueryProviders";
-import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins"
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
@@ -27,15 +26,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
+        suppressHydrationWarning
         className={`${roboto.variable} ${roboto.className} antialiased mx-auto bg-background`}
       >
         <NuqsAdapter>
-        <SessionWrapper>
-          <Providers>
-
-          {children}
-          </Providers>
-        </SessionWrapper>
+          <SessionWrapper>
+            <Providers>{children}</Providers>
+          </SessionWrapper>
         </NuqsAdapter>
       </body>
     </html>

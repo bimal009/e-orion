@@ -1,115 +1,203 @@
-import React from 'react';
+"use client";
+import React, { useEffect, useState } from "react";
+import { Trophy, Users } from "lucide-react";
+import { useGetResults } from "../dashboard/api/useResults";
+import Image from "next/image";
+import usePusher from "@/lib/hooks/usePusher";
+const TeamStatsCard = ({ gameId }: { gameId?: string | null }) => {
+  const { data: results, isLoading, error } = useGetResults(gameId || "");
+  const pusherClient = usePusher();
+  const [realtimeResults, setRealtimeResults] = useState<any[]>([]);
+  console.log(results, "results");
 
-const TeamStatsCard = () => {
-  const teams = [
-    { rank: 1, name: 'G4R', status: 'active', points: 2 },
-    { rank: 2, name: 'OG', status: 'active', points: 0 },
-    { rank: 3, name: 'EGx', status: 'active', points: 0 },
-    { rank: 4, name: 'VEx', status: 'active', points: 0 },
-    { rank: 5, name: 'LHS', status: 'active', points: 0 },
-    { rank: 6, name: 'CK', status: 'active', points: 0 },
-    { rank: 7, name: 'MDL', status: 'active', points: 0 },
-    { rank: 8, name: 'WF', status: 'active', points: 0 },
-    { rank: 9, name: 'NaNx', status: 'active', points: 0 },
-    { rank: 10, name: 'TRX', status: 'active', points: 0 },
-    { rank: 11, name: 'Diam', status: 'eliminated', points: 0 },
-    { rank: 12, name: 'PNX', status: 'active', points: 0 },
-    { rank: 13, name: 'SPIN', status: 'active', points: 0 },
-    { rank: 14, name: 'GODL', status: 'active', points: 0 },
-    { rank: 15, name: 'MM', status: 'active', points: 0 },
-    { rank: 16, name: 'Ninz', status: 'active', points: 0 },
-    { rank: 17, name: 'Ninz', status: 'active', points: 0 },
-  ];
+  useEffect(() => {
+    if (results) {
+      setRealtimeResults(results);
+    }
+  }, [results]);
 
-  const getStatusBars = (status: string , isLeader: boolean = false ) => {
-    if (status === 'eliminated') {
+  useEffect(() => {
+    if (pusherClient && gameId) {
+      const channel = pusherClient.subscribe("pubg-results");
+      channel.bind("update-player-kills", (data: any) => {
+        if (data.gameId === gameId) {
+          setRealtimeResults((prev) => {
+            const updatedResults = [...prev];
+            const teamIndex = updatedResults.findIndex(
+              (r) => r.team.id === data.teamId
+            );
+
+            if (teamIndex !== -1) {
+              updatedResults[teamIndex] = {
+                ...updatedResults[teamIndex],
+                ...data.result,
+              };
+            } else {
+              updatedResults.push(data.result);
+            }
+
+            return updatedResults;
+          });
+        }
+      });
+
+      return () => {
+        channel.unbind("update-player-kills");
+        pusherClient.unsubscribe("pubg-results");
+      };
+    }
+  }, [pusherClient, gameId]);
+
+  const teams = realtimeResults
+    ?.filter((result) => result.team.id !== "1")
+    ?.map((result) => ({
+      ...result.team,
+      status: result.placement > 16 ? "eliminated" : "active",
+      points: result.points,
+      kills: result.totalKills || 0,
+      placement: result.placement,
+    }))
+    .sort((a, b) => b.points - a.points)
+    .map((team, index) => ({
+      ...team,
+      rank: index + 1,
+    }));
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-[280px] bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+        <div className="p-4 text-center text-muted-foreground">
+          Loading results...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-[280px] bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+        <div className="p-4 text-center text-red-500">
+          Error loading results: {error.message}
+        </div>
+      </div>
+    );
+  }
+
+  if (!results || results.length === 0) {
+    return (
+      <div className="w-full max-w-[280px] bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+        <div className="p-4 text-center text-muted-foreground">
+          No results found for this game
+        </div>
+      </div>
+    );
+  }
+
+  const getStatusIndicator = (status: string, isLeader: boolean = false) => {
+    if (status === "eliminated") {
       return (
         <div className="flex gap-0.5">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="w-1.5 h-4 bg-primary rounded-sm"></div>
+            <div
+              key={i}
+              className="w-1 h-3 rounded-sm bg-muted-foreground/40"
+            />
           ))}
         </div>
       );
     }
-    
-    if (isLeader) {
-      return (
-        <div className="flex gap-0.5">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="w-1.5 h-4 bg-accent rounded-sm"></div>
-          ))}
-        </div>
-      );
-    }
-    
+
     return (
       <div className="flex gap-0.5">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="w-1.5 h-4 bg-secondary rounded-sm"></div>
+          <div key={i} className="w-1 h-3 rounded-sm bg-emerald-500" />
         ))}
       </div>
     );
   };
 
   return (
-    <div className="w-64 bg-background text-foreground font-mono text-xs">
-      {/* Header */}
-      <div className="bg-muted text-primary px-2 border-b border-border py-2 flex items-center text-xs font-bold">
-        <div className="w-4 text-left">#</div>
-        <div className="flex-1 text-left pl-1">TEAMS</div>
-        <div className="w-12 text-center">ALV</div>
-        <div className="w-8 text-center">ELMS</div>
-        <div className="w-6 text-right">PTS</div>
+    <div className="w-full max-w-[280px] bg-transparent   shadow-sm overflow-hidden">
+      <div
+        style={{
+          clipPath: "polygon(5% 0, 100% 0%, 100% 100%, 0% 100%) ",
+        }}
+        className="bg-card px-1.5 py-1 border-b border-border w-52 ml-10"
+      >
+        <div className="flex items-center text-[9px] font-semibold text-muted-foreground">
+          <div className="flex-shrink-0 w-12 text-center">TEAMS</div>
+          <div className="flex-shrink-0 w-16 text-center">STATUS</div>
+          <div className="flex-shrink-0 w-11 text-right">PTS</div>
+          <div className="flex-shrink-0 w-10 text-center">ELMS</div>
+        </div>
       </div>
-      
-      {/* Team List */}
-      <div>
-        {teams.map((team) => (
+
+      <div className="divide-y divide-border/50">
+        {teams?.map((team: any, index: number) => (
           <div
-            key={team.rank}
-            className={`px-2 py-1 flex items-center text-xs border-b border-border ${
-              team.status === 'eliminated' ? 'bg-muted opacity-75' : ''
-            } ${team.rank === 1 ? 'bg-accent/20' : ''}`}
+            style={{
+              clipPath: "polygon(5% 0, 100% 0%, 100% 100%, 0% 100%)",
+            }}
+            key={team.id}
+            className={`px-1.5 py-1 flex items-center gap-1.5 text-xs transition-all duration-200 hover:bg-muted/20 bg-card ${
+              team.status === "eliminated" ? "opacity-60" : ""
+            }`}
           >
-            {/* Rank */}
-            <div className="w-4 text-left font-bold text-primary">
+            <div className="flex-shrink-0 w-5 ml-1 flex justify-center">
               {team.rank}
             </div>
-            
-            {/* Team Name */}
-            <div className={`flex-1 pl-1 font-bold ${
-              team.status === 'eliminated' ? 'text-muted-foreground line-through' : 'text-foreground'
-            }`}>
-              {team.name}
+
+            <div className="flex-1 min-w-0 flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded border border-border/50 overflow-hidden flex-shrink-0 bg-muted/30">
+                <Image
+                  width={16}
+                  height={16}
+                  priority={true}
+                  src={team.logo}
+                  alt={team.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span
+                className={`truncate font-medium text-[11px] ${
+                  team.status === "eliminated"
+                    ? "text-muted-foreground"
+                    : "text-foreground"
+                } ${team.rank === 1 ? "font-semibold" : ""}`}
+              >
+                {team.teamTag}
+              </span>
             </div>
-            
-            {/* Status Bars (ALV) */}
-            <div className="w-12 flex justify-center">
-              {getStatusBars(team.status, team.rank === 1)}
+
+            {/* Status */}
+            <div className="flex-shrink-0 w-12  flex justify-center">
+              {getStatusIndicator(team.status, team.rank === 1)}
             </div>
-            
-            {/* ELMS column */}
-            <div className="w-8 text-center font-bold">
-              0
+
+            <div className="flex-shrink-0 text-right font-bold w-10 text-[11px] text-foreground">
+              {team.points.toLocaleString()}
             </div>
-            
-            {/* Points (PTS) */}
-            <div className="w-6 text-right font-bold">
-              {team.points}
+            {/* ELMS */}
+            <div className="flex-shrink-0 w-10 text-center font-medium text-foreground text-[11px]">
+              {team.kills}
             </div>
+
+            {/* Points */}
           </div>
         ))}
       </div>
-      
-      {/* Footer */}
-      <div className="bg-muted px-2 py-1 flex justify-between items-center text-xs">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-secondary rounded border border-border"></div>
-          <span>FINISHED</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-primary rounded border border-border"></div>
-          <span>ALIVE</span>
+
+      {/* Compact Footer Legend */}
+      <div className="bg-card px-1.5 py-1 border-t border-border/50">
+        <div className="flex items-center justify-center gap-2 text-[9px] text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <div className="w-1 h-1 bg-emerald-500 rounded-full"></div>
+            <span>Active</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-1 h-1 bg-muted-foreground/40 rounded-full"></div>
+            <span>Eliminated</span>
+          </div>
         </div>
       </div>
     </div>
