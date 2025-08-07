@@ -109,13 +109,13 @@ model Match {
 }
 
 model Team {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  name    String
-  teamTag String? @default("")
-  logo    String?
-  email   String?
-  phone   String?
-
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  teamTag      String?       @default("")
+  logo         String?
+  email        String?
+  phone        String?
+  eliminatedAt Int?
   players      Player[]
   groupId      String?       @db.ObjectId
   group        Group?        @relation(fields: [groupId], references: [id])
@@ -144,6 +144,7 @@ model Player {
   playerKills  PlayerKills[] @relation("PlayerMatchKills")
   kills        Int           @default(0)
   isEliminated Boolean       @default(false)
+  isPlaying    Boolean
 
   @@map("players")
 }
@@ -219,6 +220,8 @@ model PubgResult {
   pointsTableId String        @db.ObjectId
   groupId       String?       @db.ObjectId
   totalKills    Int
+  totalTeams    Int
+  aliveTeams    Int
   placement     Int
   points        Int           @default(0)
   resultEntry   ResultEntry[]

@@ -56,12 +56,9 @@ export const useCreateTeam = () => {
           return [newTeam];
         }
       );
-
-      toast.success("Team created successfully");
     },
     onError: (error: any) => {
       console.error("Error creating team:", error);
-      toast.error("Failed to create team");
     },
   });
 };

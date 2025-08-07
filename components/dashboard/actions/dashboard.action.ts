@@ -28,7 +28,7 @@ export const createTournment = async (data: TournamentCreateInput & { ownerId?: 
         teams: true,
       },
     })
-    console.log(tournament)
+    
     return tournament
   } catch (error) {
     handleError(error)
@@ -84,7 +84,7 @@ export const getTournaments = async () => {
       },
     })
 
-    console.log(userWithTournaments?.tournaments)
+    
 
     return userWithTournaments?.tournaments || []
   } catch (error) {
@@ -112,7 +112,7 @@ export const getTournamentsWithSearch = async (search: string) => {
       include: { teams: true, rounds: true },
     })
 
-    console.log(tournaments)
+    
 
     return tournaments || []
   } catch (error) {

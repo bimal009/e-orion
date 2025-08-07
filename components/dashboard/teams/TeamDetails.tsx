@@ -22,7 +22,7 @@ const TeamDetailsPage = ({id, teamid}:TeamDetailsPageProps) => {
   const [selectedImage, setSelectedImage] = useState<string>('')
   const [selectedImageAlt, setSelectedImageAlt] = useState<string>('')
   
-    console.log(teamid, id)
+
 
   const handleImageClick = (imageUrl: string, altText: string) => {
     setSelectedImage(imageUrl)

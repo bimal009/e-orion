@@ -735,7 +735,7 @@ export const GET = async (req: NextRequest) => {
     }
 
     // Use dummyTeams for insertion
-    console.log("inserting teams")
+
     const createdTeams = [];
     for (const team of dummyTeams) {
       const created = await prisma.team.create({
@@ -751,6 +751,7 @@ export const GET = async (req: NextRequest) => {
               create: team.players.create.map((player: any) => ({
                 name: player.name,
                 ign: player.ign,
+
                 role: player.role || null,
                 image: player.image || null,
                 email: player.email || null,
@@ -765,7 +766,7 @@ export const GET = async (req: NextRequest) => {
           round: true,
         },
       });
-      console.log("created team", created)
+
       createdTeams.push(created);
     }
     return NextResponse.json(createdTeams, { status: 201 });

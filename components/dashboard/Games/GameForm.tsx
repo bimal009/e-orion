@@ -194,7 +194,7 @@ const GameForm = ({
         day: data.day,
       };
 
-      console.log("Game created:", formData);
+      
       mutate(formData);
 
       reset();

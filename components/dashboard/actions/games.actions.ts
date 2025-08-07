@@ -52,6 +52,8 @@ export const createGame = async (data: GameCreateInput) => {
               teamId: team.id,
               pointsTableId: pointsTable.id,
               groupId: data.groupId || null,
+              totalTeams: teams.length,
+              aliveTeams: teams.length,
               totalKills: 0,
               placement: 0,
               points: 0
@@ -81,7 +83,7 @@ export const createGame = async (data: GameCreateInput) => {
       }
     }
 
-    console.log(match)
+
     return match
   } catch (error) {
     handleError(error)
@@ -183,7 +185,7 @@ export const getGamesWithSearch = async (tournmentId: string, search: string) =>
       include: { tournament: true },
     })
 
-    console.log(games)
+
 
     return games || []
   } catch (error) {

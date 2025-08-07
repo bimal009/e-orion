@@ -95,7 +95,7 @@
           tournamentId: tournmentId,
         }
         
-        console.log('Round created:', formData)
+
         mutate(formData)
         
         // Reset form

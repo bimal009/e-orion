@@ -13,7 +13,7 @@ interface RoundCardProps {
 const RoundCard = ({ round, onEdit }: RoundCardProps) => {
     const { mutate, isPending } = useDeleteRound()
     const handleDelete = (id: string) => {
-        console.log("RoundCard: Delete button clicked for roundId:", id)
+
         mutate(id)
     }
     const router = useRouter()
@@ -77,7 +77,7 @@ const RoundCard = ({ round, onEdit }: RoundCardProps) => {
                   <button
                     className="flex items-center w-full text-left px-4 py-3 text-sm hover:bg-destructive/10 text-destructive transition-colors rounded-lg mx-1"
                     onClick={e => { 
-                      console.log("RoundCard: Delete button clicked, round.id:", round.id)
+              
                       e.stopPropagation(); 
                       setMenuOpen(false); 
                       round.id && handleDelete(round.id); 

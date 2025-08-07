@@ -34,7 +34,7 @@ const GameList = ({
   const tournamentIdForGroups = games?.[0]?.tournamentId;
   const { data: groups, isPending: isGroupsPending } =
     useGetGroupsByRoundId(roundId);
-  console.log(groups, "groups");
+
   const [formOpen, setFormOpen] = useState(false);
   const [formType, setFormType] = useState<"create" | "edit">("create");
   const [editGame, setEditGame] = useState<Match | null>(null);
@@ -49,7 +49,6 @@ const GameList = ({
     setEditGame(null);
     setFormType("create");
     setFormOpen(true);
-    console.log(formOpen);
   };
 
   const gameList = games;

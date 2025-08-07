@@ -22,7 +22,6 @@ export const createTeam = async (data: TeamCreateInput) => {
         teamTag: data.teamTag ?? null,
         email: data.email || null,
         phone: data.phone || null,
-        // Create new players instead of connecting existing ones
         players: data.players && data.players.length > 0 ? {
           create: data.players.map((player) => ({
             name: player.name,
@@ -31,6 +30,7 @@ export const createTeam = async (data: TeamCreateInput) => {
             image: player.image || null,
             email: player.email || null,
             phone: player.phone || null,
+            isPlaying: Boolean(player.isPlaying)
           })),
         } : undefined,
       },
@@ -40,7 +40,7 @@ export const createTeam = async (data: TeamCreateInput) => {
         round: true,
       },
     })
-    console.log(team)
+
     return team
   } catch (error) {
     handleError(error)
@@ -91,6 +91,7 @@ export const updateTeam = async (id: string, data: TeamCreateInput) => {
             image: player.image || null,
             email: player.email || null,
             phone: player.phone || null,
+            isPlaying: Boolean(player.isPlaying) // ensure primitive boolean
           })),
         } : undefined,
       },
@@ -193,7 +194,7 @@ export const getTeamsWithSearch = async (tournmentId: string, search: string) =>
       include: { players: true },
     })
 
-    console.log(teams)
+
 
     return teams || []
   } catch (error) {

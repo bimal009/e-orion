@@ -22,7 +22,6 @@ interface PointTableCardProps {
 const PointTableCard = ({ pointTable, onEdit }: PointTableCardProps) => {
   const { mutate, isPending } = useDeletePointTable();
   const handleDelete = (id: string) => {
-    console.log("PointTableCard: Delete button clicked for pointTableId:", id);
     mutate(id);
   };
   const router = useRouter();
@@ -101,10 +100,6 @@ const PointTableCard = ({ pointTable, onEdit }: PointTableCardProps) => {
                 <button
                   className="flex items-center w-full text-left px-4 py-3 text-sm hover:bg-destructive/10 text-destructive transition-colors rounded-lg mx-1"
                   onClick={(e) => {
-                    console.log(
-                      "PointTableCard: Delete button clicked, pointTable.id:",
-                      pointTable.id
-                    );
                     e.stopPropagation();
                     setMenuOpen(false);
                     pointTable.id && handleDelete(pointTable.id);

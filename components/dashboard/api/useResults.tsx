@@ -1,5 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getResults, updatePlayerKills } from "../actions/results.action";
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  getResults,
+  updatePlayerElimination,
+  updatePlayerKills,
+} from "../actions/results.action";
 
 export const useGetResults = (gameId: string) => {
   return useQuery({
@@ -32,8 +41,28 @@ export const useUpdateKills = () => {
       console.error("Error updating player kills:", error);
     },
     onSuccess: (data, variables) => {
-      console.log("Player kills updated successfully:", data);
       // Invalidate and refetch the results query
+      queryClient.invalidateQueries({
+        queryKey: ["results", variables.gameId],
+      });
+    },
+  });
+};
+
+export const useEliminatePlayer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      gameId,
+      teamId,
+      playerId,
+    }: {
+      gameId: string;
+      teamId: string;
+      playerId: string;
+    }) => updatePlayerElimination(gameId, teamId, playerId),
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["results", variables.gameId],
       });

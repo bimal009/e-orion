@@ -36,7 +36,7 @@ const PointTableList = ({ tournmentId }: { tournmentId: string }) => {
     setEditPointTable(null);
     setFormType("create");
     setFormOpen(true);
-    console.log(formOpen);
+    
   };
 
   const pointTables = data;

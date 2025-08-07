@@ -112,6 +112,7 @@ export interface Player {
   image?: string | null;
   email?: string | null;
   phone?: string | null;
+  isPlaying: Boolean
 }
 
 export interface Group {

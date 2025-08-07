@@ -47,14 +47,6 @@ export default function GroupDetailsPage() {
   const groupId = params.gid as string;
   const tournamentId = params.id as string;
   const roundId = params.rid as string;
-  console.log(
-    tournamentId,
-    "tournamentId",
-    roundId,
-    "roundId",
-    groupId,
-    "groupId"
-  );
 
   const { data: group, isLoading, error } = useGetGroupById(groupId);
 

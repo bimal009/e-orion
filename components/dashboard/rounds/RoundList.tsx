@@ -32,7 +32,7 @@ const RoundList = ({ tournmentId }: { tournmentId: string }) => {
     setEditRound(null);
     setFormType("create");
     setFormOpen(true);
-    console.log(formOpen);
+    
   };
 
   const rounds = search ? data2 : data;

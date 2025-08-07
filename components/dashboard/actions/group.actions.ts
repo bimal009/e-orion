@@ -61,6 +61,8 @@ export const createGroup = async (data: GroupCreateInput) => {
               pointsTableId: pointsTable.id,
               groupId: group.id,
               totalKills: 0,
+              totalTeams: data.teams.length,
+              aliveTeams: data.teams.length,
               placement: 0,
               points: 0
             })
@@ -125,6 +127,17 @@ export const updateGroup = async (id: string, data: GroupCreateInput) => {
           teamId: { in: teamsToRemove }
         }
       })
+
+      // Update totalTeams for existing PubgResult entries to reflect new team count
+      const totalTeamsInGroup = newTeamIds.length
+      await prisma.pubgResult.updateMany({
+        where: {
+          groupId: id
+        },
+        data: {
+          totalTeams: totalTeamsInGroup
+        }
+      })
     }
 
     // Add new teams to the group
@@ -148,6 +161,7 @@ export const updateGroup = async (id: string, data: GroupCreateInput) => {
 
       if (matches.length > 0 && pointsTable) {
         const resultEntries = []
+        const totalTeamsInGroup = newTeamIds.length // Total teams after update
 
         for (const teamId of teamsToAdd) {
           for (const match of matches) {
@@ -157,6 +171,8 @@ export const updateGroup = async (id: string, data: GroupCreateInput) => {
               pointsTableId: pointsTable.id,
               groupId: id,
               totalKills: 0,
+              aliveTeams: totalTeamsInGroup,
+              totalTeams: totalTeamsInGroup,
               placement: 0,
               points: 0
             })
@@ -177,6 +193,9 @@ export const updateGroup = async (id: string, data: GroupCreateInput) => {
         name: data.name,
         tournamentId: data.tournamentId,
         roundId: data.roundId || null,
+        teams: {
+          set: data.teams?.map(team => ({ id: team.id })) || []
+        }
       },
       include: {
         teams: { include: { players: true } },
@@ -213,7 +232,6 @@ export const getGroups = async (tournamentId: string) => {
       },
       orderBy: { id: 'asc' },
     })
-    console.log(groups)
 
     return groups || []
   } catch (error) {
@@ -249,7 +267,6 @@ export const getGroupsWithSearch = async (tournamentId: string, search: string) 
       },
     })
 
-    console.log(groups)
 
     return groups || []
   } catch (error) {

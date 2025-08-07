@@ -26,7 +26,7 @@ export const createPointTable = async (data: PointTableCreateInput) => {
       },
       
     })
-    console.log(pointTable)
+    
     return pointTable
   } catch (error) {
     handleError(error)

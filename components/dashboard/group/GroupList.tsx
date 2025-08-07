@@ -37,7 +37,7 @@ const GroupList = ({
     setEditGroup(null);
     setFormType("create");
     setFormOpen(true);
-    console.log(formOpen);
+    
   };
 
   const groups = search ? data2 : data;

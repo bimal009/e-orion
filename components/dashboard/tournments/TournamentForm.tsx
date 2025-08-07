@@ -172,7 +172,7 @@ const TournamentForm = ({
         ...(type === "edit" && initialData?.id ? { id: initialData.id } : {}),
       };
 
-      console.log("Tournament created:", formData);
+      
       mutate(formData);
 
       // Reset form

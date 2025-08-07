@@ -10,7 +10,7 @@ import Image from 'next/image'
 
 const Header = () => {
     const { data: session, status } = useSession()
-console.log(session?.user.image)
+
     const handleSignOut = () => {
         signOut({
             callbackUrl: '/' 

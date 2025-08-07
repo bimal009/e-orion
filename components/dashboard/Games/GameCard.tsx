@@ -13,7 +13,7 @@ import { Group, Map, Match } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import React, { useState, useRef } from "react";
 import { useDeleteGame } from "../api/useGames";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface GameCardProps {
   game: Match;
@@ -194,17 +194,14 @@ const GameCard = ({
 
         {/* Go Live Button */}
         <div className="mt-6 py-3 flex justify-end">
-          <Button
-            variant="default"
-            size="lg"
-            className="rounded-full px-6 flex items-center gap-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(`/stream/${game.id}`);
-            }}
+          <Link
+            target="_blank"
+            href={`/stream/${game.id}`}
+            className="text-sm  bg-primary text-primary-foreground px-4 py-2 rounded-full flex items-center gap-2"
           >
-            <PlayCircle className="w-5 h-5 mr-2" /> Go Live
-          </Button>
+            <PlayCircle className="w-5 h-5 mr-2" />
+            Go Live
+          </Link>
         </div>
 
         {/* Hover Effect */}

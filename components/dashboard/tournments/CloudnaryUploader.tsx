@@ -58,7 +58,7 @@ const CloudinaryUploader: React.FC<CloudinaryUploaderProps> = ({
             }
 
             const data = await response.json();
-            console.log('Upload response:', data);
+    
 
             onImageUpload(data.secure_url);
 

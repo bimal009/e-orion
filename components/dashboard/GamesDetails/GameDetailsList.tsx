@@ -25,13 +25,9 @@ const GameDetailsPage = ({
 }) => {
   const router = useRouter();
   const { data: game, isPending: isGamePending } = useGetGamesByGameId(gameId);
-  console.log(game?.group?.teams, "game");
   const { data: groups, isPending: isGroupsPending } =
     useGetGroupsByGameId(gameId);
-  console.log(
-    groups?.flatMap((group) => group.teams || []),
-    "groups"
-  );
+
   const { data: maps, isPending: isMapsPending } = useGetMaps();
   const [formOpen, setFormOpen] = useState(false);
   const [formType, setFormType] = useState<"create" | "edit">("create");

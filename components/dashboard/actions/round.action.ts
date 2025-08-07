@@ -36,7 +36,7 @@ export const createRound = async (data: RoundCreateInput) => {
         }
       },
     })
-    console.log(round)
+    
     return round
   } catch (error) {
     handleError(error)
@@ -82,7 +82,7 @@ export const getRounds = async (tournmentId: string) => {
     if (!session?.user?.id) {
       throw new Error("User not authenticated")
     }
-    console.log(tournmentId)
+    
 
     if (!tournmentId) {
       throw new Error("Tournament ID is required")
@@ -120,7 +120,7 @@ export const getRoundsWithSearch = async (tournamentId: string, search: string) 
       include: { teams: true, groups: true },
     })
 
-    console.log(rounds)
+    
 
     return rounds || []
   } catch (error) {
@@ -203,9 +203,6 @@ export const deleteRound = async (roundId: string) => {
       })
     }
 
-    console.log("Round to delete:", round)
-    console.log("Matches in round:", round.matches?.length || 0)
-    console.log("Groups in round:", round.groups?.length || 0)
 
 
     const deletedRound = await prisma.round.delete({
@@ -216,7 +213,7 @@ export const deleteRound = async (roundId: string) => {
       },
     })
 
-    console.log("Successfully deleted round:", deletedRound)
+    
 
     return deletedRound
   } catch (error) {
