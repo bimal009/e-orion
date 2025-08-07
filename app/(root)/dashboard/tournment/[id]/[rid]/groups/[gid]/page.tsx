@@ -465,22 +465,10 @@ export default function GroupDetailsPage() {
                   <div className="flex items-center space-x-2">
                     <div
                       className="w-4 h-4 rounded-full border-2"
-                      style={{ backgroundColor: group.tournament.primaryColor }}
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      Primary Color
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className="w-4 h-4 rounded-full border-2"
                       style={{
-                        backgroundColor: group.tournament.secondaryColor,
+                        backgroundColor: group.tournament.selectedTheme,
                       }}
                     />
-                    <span className="text-sm text-muted-foreground">
-                      Secondary Color
-                    </span>
                   </div>
                 </div>
               </div>

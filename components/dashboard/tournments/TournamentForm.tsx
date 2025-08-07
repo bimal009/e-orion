@@ -1,59 +1,86 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { X, Trophy } from 'lucide-react'
-import CloudinaryUploader from './CloudnaryUploader'
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { X, Trophy, Check } from "lucide-react";
+import CloudinaryUploader from "./CloudnaryUploader";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { toast } from 'sonner'
-import { useCreateTournament, useUpdateTournament } from '../api/UseTournment'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useCreateTournament, useUpdateTournament } from "../api/UseTournment";
+
+// Predefined color themes
+const colorThemes = [
+  { name: "Red", value: "#FB2C36" },
+  { name: "Rose", value: "#FF2056" },
+  { name: "Orange", value: "#FF6900" },
+  { name: "Green", value: "#5EA500" },
+  { name: "Blue", value: "#2B7FFF" },
+  { name: "Yellow", value: "#F0B100" },
+  { name: "Violet", value: "#8E51FF" },
+];
 
 // Zod validation schema
 const tournamentSchema = z.object({
   name: z
     .string()
-    .min(3, 'Tournament name must be at least 3 characters')
-    .max(50, 'Tournament name must be less than 50 characters')
-    .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Tournament name can only contain letters, numbers, spaces, hyphens, and underscores'),
+    .min(3, "Tournament name must be at least 3 characters")
+    .max(50, "Tournament name must be less than 50 characters")
+    .regex(
+      /^[a-zA-Z0-9\s\-_]+$/,
+      "Tournament name can only contain letters, numbers, spaces, hyphens, and underscores"
+    ),
   logo: z
     .string()
-    .url('Please upload a valid logo image')
+    .url("Please upload a valid logo image")
     .optional()
-    .or(z.literal('')),
+    .or(z.literal("")),
   ownerId: z.string(),
-  primaryColor: z.string().min(1, 'Primary color is required'),
-  secondaryColor: z.string().min(1, 'Secondary color is required'),
-  textColor1: z.string().min(1, 'Text color 1 is required'),
-  textColor2: z.string().min(1, 'Text color 2 is required'),
-})
+  selectedTheme: z
+    .string()
+    .min(1, "Please select a theme color")
+    .refine(
+      (value) => colorThemes.some((theme) => theme.name === value),
+      "Please select a valid theme color"
+    ),
+});
 
-type TournamentFormData = z.infer<typeof tournamentSchema>
+type TournamentFormData = z.infer<typeof tournamentSchema>;
 
 type FormProps = {
-  opened: boolean
-  onClose?: () => void
-  onSubmit?: (data: TournamentFormData & { logo: string }) => void
-  type: 'create' | 'edit'
-  initialData?: any
-}
+  opened: boolean;
+  onClose?: () => void;
+  onSubmit?: (data: TournamentFormData & { logo: string }) => void;
+  type: "create" | "edit";
+  initialData?: any;
+};
 
-const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormProps) => {
-  const [imageUrl, setImageUrl] = useState<string | null>(initialData?.logo || null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isImageUploading, setIsImageUploading] = useState(false)
+const TournamentForm = ({
+  opened,
+  onClose,
+  onSubmit,
+  type,
+  initialData,
+}: FormProps) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(
+    initialData?.logo || null
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
   // Keep track of the original image URL for edit mode
-  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(initialData?.logo || null)
+  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(
+    initialData?.logo || null
+  );
 
   const {
     register,
@@ -61,106 +88,126 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
     formState: { errors, isValid },
     reset,
     setValue,
-    watch
+    watch,
   } = useForm<TournamentFormData>({
     resolver: zodResolver(tournamentSchema),
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: initialData || {
-      name: '',
-      logo: '',
-      ownerId: '',
-      primaryColor: '',
-      secondaryColor: '',
-      textColor1: '',
-      textColor2: '',
-    }
-  })
+      name: "",
+      logo: "",
+      ownerId: "",
+      selectedTheme: "",
+    },
+  });
+
+  const selectedTheme = watch("selectedTheme");
 
   React.useEffect(() => {
     if (initialData) {
-      reset({ ...initialData })
-      setImageUrl(initialData.logo || null)
-      setOriginalImageUrl(initialData.logo || null)
+      // If initialData has a selectedTheme that's a hex value, convert it to name
+      let themeName = initialData.selectedTheme;
+      if (
+        initialData.selectedTheme &&
+        initialData.selectedTheme.startsWith("#")
+      ) {
+        const theme = colorThemes.find(
+          (t) => t.value === initialData.selectedTheme
+        );
+        themeName = theme?.name || initialData.selectedTheme;
+      }
+
+      reset({
+        ...initialData,
+        selectedTheme: themeName,
+      });
+      setImageUrl(initialData.logo || null);
+      setOriginalImageUrl(initialData.logo || null);
     } else {
       reset({
-        name: '',
-        logo: '',
-        ownerId: '',  
-        primaryColor: '',
-        secondaryColor: '',
-        textColor1: '',
-        textColor2: '',
-      })
-      setImageUrl(null)
-      setOriginalImageUrl(null)
+        name: "",
+        logo: "",
+        ownerId: "",
+        selectedTheme: "",
+      });
+      setImageUrl(null);
+      setOriginalImageUrl(null);
     }
-  }, [initialData, reset])
+  }, [initialData, reset]);
 
   const handleImageUpload = (url: string) => {
+    setImageUrl(url);
+    setValue("logo", url, { shouldValidate: true });
+  };
 
-    setImageUrl(url)
-    
-    setValue('logo', url, { shouldValidate: true })
-  }
+  const handleThemeSelect = (colorValue: string) => {
+    // Find the theme name based on the color value
+    const selectedTheme = colorThemes.find(
+      (theme) => theme.value === colorValue
+    );
+    if (selectedTheme) {
+      setValue("selectedTheme", selectedTheme.name, { shouldValidate: true });
+    }
+  };
 
-  const {mutate ,isPending}=type === 'edit' ? useUpdateTournament() : useCreateTournament()
+  const { mutate, isPending } =
+    type === "edit" ? useUpdateTournament() : useCreateTournament();
 
   const onFormSubmit = async (data: TournamentFormData) => {
     if (!imageUrl) {
-      toast.error(
-       "Please upload a tournament logo",
-    
-      )
-      return
+      toast.error("Please upload a tournament logo");
+      return;
     }
 
-    setIsSubmitting(true)
-    
+    if (!data.selectedTheme) {
+      toast.error("Please select a theme color");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      // Simulate API call - replace with your actual API call
-      
       const formData = {
         ...data,
         logo: imageUrl,
-        primaryColor: data.primaryColor || "",
-        secondaryColor: data.secondaryColor || "",
-        textColor1: data.textColor1 || "",
-        textColor2: data.textColor2 || "",
-        ...(type === 'edit' && initialData?.id ? { id: initialData.id } : {}),
-      }
-      
-      console.log('Tournament created:', formData)
-      mutate(formData)
-      
+        ...(type === "edit" && initialData?.id ? { id: initialData.id } : {}),
+      };
+
+      console.log("Tournament created:", formData);
+      mutate(formData);
+
       // Reset form
-      reset()
-      setImageUrl(null)
-      setOriginalImageUrl(null)
-      onClose?.()
+      reset();
+      setImageUrl(null);
+      setOriginalImageUrl(null);
+      onClose?.();
 
       toast.success(
-        type === 'edit' ? "Tournament updated successfully" : "Tournament created successfully",
-      )
+        type === "edit"
+          ? "Tournament updated successfully"
+          : "Tournament created successfully"
+      );
     } catch (error) {
-      console.error('Error creating tournament:', error)
+      console.error("Error creating tournament:", error);
       toast.error(
-       type === 'edit' ? "Failed to update tournament" : "Failed to create tournament",
-      )
+        type === "edit"
+          ? "Failed to update tournament"
+          : "Failed to create tournament"
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleClose = () => {
     // Restore original image URL if in edit mode
-    if (type === 'edit' && originalImageUrl) {
-      setImageUrl(originalImageUrl)
+    if (type === "edit" && originalImageUrl) {
+      setImageUrl(originalImageUrl);
     } else {
-      setImageUrl(null)
+      setImageUrl(null);
     }
-    reset()
-    onClose?.()
-  }
+    reset();
+    onClose?.();
+  };
 
   return (
     <Dialog open={opened} onOpenChange={handleClose}>
@@ -170,20 +217,30 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
             <div className="bg-primary p-2 rounded-lg">
               <Trophy className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-foreground">{type === 'edit' ? 'Edit Tournament' : 'Create New Tournament'}</span>
+            <span className="text-foreground">
+              {type === "edit" ? "Edit Tournament" : "Create New Tournament"}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {type === 'edit' ? 'Update the details below to edit the tournament.' : 'Fill in the details below to create a new tournament.'}
+            {type === "edit"
+              ? "Update the details below to edit the tournament."
+              : "Fill in the details below to create a new tournament."}
           </DialogDescription>
         </DialogHeader>
 
         {/* Tournament Banner */}
         <div className="mb-6">
-          <Label className="mb-2 block text-foreground">{type === 'edit' ? 'Change Image' : 'Tournament Banner'}</Label>
+          <Label className="mb-2 block text-foreground">
+            {type === "edit" ? "Change Image" : "Tournament Banner"}
+          </Label>
           <CloudinaryUploader
             onImageUpload={handleImageUpload}
             previewImage={imageUrl}
-            placeholderText={type === 'edit' ? 'Change image' : 'Drop your image here, or browse'}
+            placeholderText={
+              type === "edit"
+                ? "Change image"
+                : "Drop your image here, or browse"
+            }
             aspectRatio="rectangle"
             className="border-2 border-dashed border-border rounded-lg hover:border-primary transition-colors w-full min-h-[220px] flex items-center justify-center"
             onUploadingChange={setIsImageUploading}
@@ -199,9 +256,11 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
           <div className="grid grid-cols-1 gap-6">
             {/* Tournament Name */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-foreground">Tournament Name</Label>
+              <Label htmlFor="name" className="text-foreground">
+                Tournament Name
+              </Label>
               <Input
-                {...register('name')}
+                {...register("name")}
                 type="text"
                 id="name"
                 placeholder="Enter tournament name"
@@ -214,111 +273,63 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
               )}
             </div>
 
-            {/* Color Pickers Grid - Responsive */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Primary Color */}
-              <div className="space-y-2">
-                <Label htmlFor="primaryColor" className="text-foreground">Primary Color</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    {...register('primaryColor')}
-                    id="primaryColor"
-                    className="w-10 h-10 p-0 rounded flex-shrink-0"
-                    value={watch('primaryColor')}
-                    onChange={e => setValue('primaryColor', e.target.value, { shouldValidate: true })}
-                  />
-                  <Input
-                    {...register('primaryColor')}
-                    type="text"
-                    placeholder="#000000"
-                    className="bg-background flex-1 min-w-0"
-                  />
-                </div>
-                {errors.primaryColor && (
-                  <p className="text-sm font-medium text-destructive">
-                    {errors.primaryColor.message}
-                  </p>
-                )}
+            {/* Theme Color Selection */}
+            <div className="space-y-3">
+              <Label className="text-foreground">Select Theme Color</Label>
+              <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
+                {colorThemes.map((theme) => (
+                  <button
+                    key={theme.value}
+                    type="button"
+                    onClick={() => handleThemeSelect(theme.value)}
+                    className={`relative w-12 h-12 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${
+                      selectedTheme === theme.name
+                        ? "border-foreground shadow-lg"
+                        : "border-border hover:border-foreground/50"
+                    }`}
+                    style={{ backgroundColor: theme.value }}
+                    title={theme.name}
+                  >
+                    {selectedTheme === theme.name && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Check className="h-5 w-5 text-white drop-shadow-lg" />
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
-
-              {/* Secondary Color */}
-              <div className="space-y-2">
-                <Label htmlFor="secondaryColor" className="text-foreground">Secondary Color</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    {...register('secondaryColor')}
-                    id="secondaryColor"
-                    className="w-10 h-10 p-0 rounded flex-shrink-0"
-                    value={watch('secondaryColor')}
-                    onChange={e => setValue('secondaryColor', e.target.value, { shouldValidate: true })}
-                  />
-                  <Input
-                    {...register('secondaryColor')}
-                    type="text"
-                    placeholder="#ffffff"
-                    className="bg-background flex-1 min-w-0"
-                  />
+              {errors.selectedTheme && (
+                <p className="text-sm font-medium text-destructive">
+                  {errors.selectedTheme.message}
+                </p>
+              )}
+              {selectedTheme && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm text-muted-foreground">
+                    Selected:
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-4 h-4 rounded border border-border"
+                      style={{
+                        backgroundColor: colorThemes.find(
+                          (theme) => theme.name === selectedTheme
+                        )?.value,
+                      }}
+                    />
+                    <span className="text-sm font-medium">{selectedTheme}</span>
+                    <span className="text-sm text-muted-foreground font-mono">
+                      (
+                      {
+                        colorThemes.find(
+                          (theme) => theme.name === selectedTheme
+                        )?.value
+                      }
+                      )
+                    </span>
+                  </div>
                 </div>
-                {errors.secondaryColor && (
-                  <p className="text-sm font-medium text-destructive">
-                    {errors.secondaryColor.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Text Color 1 */}
-              <div className="space-y-2">
-                <Label htmlFor="textColor1" className="text-foreground">Text Color 1</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    {...register('textColor1')}
-                    id="textColor1"
-                    className="w-10 h-10 p-0 rounded flex-shrink-0"
-                    value={watch('textColor1')}
-                    onChange={e => setValue('textColor1', e.target.value, { shouldValidate: true })}
-                  />
-                  <Input
-                    {...register('textColor1')}
-                    type="text"
-                    placeholder="#000000"
-                    className="bg-background flex-1 min-w-0"
-                  />
-                </div>
-                {errors.textColor1 && (
-                  <p className="text-sm font-medium text-destructive">
-                    {errors.textColor1.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Text Color 2 */}
-              <div className="space-y-2">
-                <Label htmlFor="textColor2" className="text-foreground">Text Color 2</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    {...register('textColor2')}
-                    id="textColor2"
-                    className="w-10 h-10 p-0 rounded flex-shrink-0"
-                    value={watch('textColor2')}
-                    onChange={e => setValue('textColor2', e.target.value, { shouldValidate: true })}
-                  />
-                  <Input
-                    {...register('textColor2')}
-                    type="text"
-                    placeholder="#ffffff"
-                    className="bg-background flex-1 min-w-0"
-                  />
-                </div>
-                {errors.textColor2 && (
-                  <p className="text-sm font-medium text-destructive">
-                    {errors.textColor2.message}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
           </div>
 
@@ -334,24 +345,32 @@ const TournamentForm = ({ opened, onClose, onSubmit, type, initialData }: FormPr
             </Button>
             <Button
               type="submit"
-              disabled={!isValid || !imageUrl || isSubmitting || isPending || isImageUploading}
+              disabled={
+                !isValid ||
+                !imageUrl ||
+                !selectedTheme ||
+                isSubmitting ||
+                isPending ||
+                isImageUploading
+              }
               className="flex-1 sm:flex-none sm:max-w-xs order-1 sm:order-2"
             >
               {isSubmitting || isPending ? (
                 <>
                   <span className="animate-spin mr-2">↻</span>
-                  {type === 'edit' ? 'Updating...' : 'Creating...'}
+                  {type === "edit" ? "Updating..." : "Creating..."}
                 </>
+              ) : type === "edit" ? (
+                "Update Tournament"
               ) : (
-                type === 'edit' ? 'Update Tournament' : 'Create Tournament'
-
+                "Create Tournament"
               )}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default TournamentForm
+export default TournamentForm;

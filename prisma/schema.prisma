@@ -54,23 +54,20 @@ model Session {
 }
 
 model Tournament {
-  id             String        @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  logo           String
-  ownerId        String        @db.ObjectId
-  owner          User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  rounds         Round[]       @relation("TournamentRounds")
-  groups         Group[]       @relation("TournamentGroups")
-  teams          Team[]        @relation("TournamentTeams")
-  matches        Match[]       @relation("TournamentMatches")
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  primaryColor   String
-  secondaryColor String
-  textColor1     String
-  textColor2     String
-  pointsTable    PointsTable[]
-  results        ResultEntry[]
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  logo          String
+  ownerId       String        @db.ObjectId
+  owner         User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  rounds        Round[]       @relation("TournamentRounds")
+  groups        Group[]       @relation("TournamentGroups")
+  teams         Team[]        @relation("TournamentTeams")
+  matches       Match[]       @relation("TournamentMatches")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  selectedTheme String
+  pointsTable   PointsTable[]
+  results       ResultEntry[]
 
   @@map("tournaments")
 }

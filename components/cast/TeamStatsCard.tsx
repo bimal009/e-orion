@@ -110,7 +110,7 @@ const TeamStatsCard = ({ gameId }: { gameId?: string | null }) => {
     return (
       <div className="flex gap-0.5">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="w-1 h-3 rounded-sm bg-emerald-500" />
+          <div key={i} className="w-1 h-3 rounded-sm bg-primary" />
         ))}
       </div>
     );
@@ -191,7 +191,7 @@ const TeamStatsCard = ({ gameId }: { gameId?: string | null }) => {
       <div className="bg-card px-1.5 py-1 border-t border-border/50">
         <div className="flex items-center justify-center gap-2 text-[9px] text-muted-foreground">
           <div className="flex items-center gap-1">
-            <div className="w-1 h-1 bg-emerald-500 rounded-full"></div>
+            <div className="w-1 h-1 bg-primary rounded-full"></div>
             <span>Active</span>
           </div>
           <div className="flex items-center gap-1">

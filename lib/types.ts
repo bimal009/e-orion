@@ -54,10 +54,7 @@ export interface Tournament {
   groups?: Group[];
   createdAt?: Date;
   updatedAt?: Date;
-  primaryColor: string;
-  secondaryColor: string;
-  textColor1: string;
-  textColor2: string;
+  selectedTheme: String
   teams?: Team[];
 }
 
@@ -150,10 +147,7 @@ export interface PointsTable {
 export type TournamentCreateInput = {
   name: string;
   logo?: string | null;
-  primaryColor: string;
-  secondaryColor: string;
-  textColor1: string;
-  textColor2: string;
+  selectedTheme: String
 };
 
 export type RoundCreateInput = {

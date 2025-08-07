@@ -1,11 +1,7 @@
-import React from 'react'
+import React from "react";
+import "./Red.css";
+const layout = ({ children }: { children: React.ReactNode }) => {
+  return <main className=" bg-transparent ">{children}</main>;
+};
 
-const layout = ({children}:{children:React.ReactNode}) => {
-  return (
-    <main className=' bg-transparent '>
-     {children}
-    </main>
-  )
-}
-
-export default layout
+export default layout;

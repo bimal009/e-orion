@@ -13,6 +13,11 @@ export const getResults = async (id: string) => {
         const results = await prisma.pubgResult.findMany({
             where: { matchId: id },
             include: {
+                match: {
+                    include: {
+                        tournament: true
+                    }
+                },
                 team: {
                     include: {
                         players: {
@@ -126,6 +131,11 @@ export const updatePlayerKills = async (gameId: string, teamId: string, playerId
         const updatedResult = await prisma.pubgResult.findUnique({
             where: { id: pubgResult.id },
             include: {
+                match: {
+                    include: {
+                        tournament: true
+                    }
+                },
                 team: {
                     include: {
                         players: {
