@@ -41,7 +41,7 @@ const ResultPage = () => {
   const params = useParams();
   const gameId = params.gid as string;
   const { data: results, isLoading, refetch } = useGetResults(gameId);
-  const pusherClient = usePusher();
+  const { pusherClient } = usePusher();
   const [realtimeResults, setRealtimeResults] = useState<TeamResult[]>([]);
 
   useEffect(() => {

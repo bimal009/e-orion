@@ -751,11 +751,11 @@ export const GET = async (req: NextRequest) => {
               create: team.players.create.map((player: any) => ({
                 name: player.name,
                 ign: player.ign,
-
                 role: player.role || null,
                 image: player.image || null,
                 email: player.email || null,
                 phone: player.phone || null,
+                isPlaying: true,
               })),
             }
             : undefined,
