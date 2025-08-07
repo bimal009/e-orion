@@ -54,7 +54,7 @@ export interface Tournament {
   groups?: Group[];
   createdAt?: Date;
   updatedAt?: Date;
-  selectedTheme: String
+  selectedTheme: string
   teams?: Team[];
 }
 
@@ -147,7 +147,7 @@ export interface PointsTable {
 export type TournamentCreateInput = {
   name: string;
   logo?: string | null;
-  selectedTheme: String
+  selectedTheme: string
 };
 
 export type RoundCreateInput = {
@@ -214,3 +214,22 @@ export type GameCreateInput = {
   day?: number | null;
   pointsTableId?: string | null;
 };
+
+// Theme types
+export type ThemeName = 'Red' | 'Blue' | 'Green' | 'Orange' | 'Rose' | 'Violet' | 'Yellow';
+
+export interface ThemeInfo {
+  name: ThemeName;
+  displayName: string;
+  description?: string;
+}
+
+export const AVAILABLE_THEMES: ThemeInfo[] = [
+  { name: 'Red', displayName: 'Red Theme', description: 'Bold red color scheme' },
+  { name: 'Blue', displayName: 'Blue Theme', description: 'Cool blue color scheme' },
+  { name: 'Green', displayName: 'Green Theme', description: 'Fresh green color scheme' },
+  { name: 'Orange', displayName: 'Orange Theme', description: 'Warm orange color scheme' },
+  { name: 'Rose', displayName: 'Rose Theme', description: 'Elegant rose color scheme' },
+  { name: 'Violet', displayName: 'Violet Theme', description: 'Royal violet color scheme' },
+  { name: 'Yellow', displayName: 'Yellow Theme', description: 'Bright yellow color scheme' },
+];

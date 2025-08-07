@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Trophy, Users } from "lucide-react";
 import { useGetResults } from "../dashboard/api/useResults";
 import Image from "next/image";
 import usePusher from "@/lib/hooks/usePusher";
@@ -8,7 +7,6 @@ const TeamStatsCard = ({ gameId }: { gameId?: string | null }) => {
   const { data: results, isLoading, error } = useGetResults(gameId || "");
   const pusherClient = usePusher();
   const [realtimeResults, setRealtimeResults] = useState<any[]>([]);
-  console.log(results, "results");
 
   useEffect(() => {
     if (results) {
