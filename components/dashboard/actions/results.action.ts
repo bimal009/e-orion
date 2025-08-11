@@ -13,7 +13,6 @@ export const getResults = async (id: string) => {
         const results = await prisma.pubgResult.findMany({
             where: { matchId: id },
             include: {
-                // Match details with essential tournament info
                 match: {
                     select: {
                         id: true,
@@ -48,12 +47,10 @@ export const getResults = async (id: string) => {
                             select: {
                                 id: true,
                                 name: true
-
                             }
                         }
                     }
                 },
-                // Team with players and their kills for this specific match
                 team: {
                     select: {
                         id: true,
@@ -86,7 +83,6 @@ export const getResults = async (id: string) => {
                         }
                     }
                 },
-                // Player kills for this match
                 playerKills: {
                     select: {
                         id: true,
@@ -107,7 +103,6 @@ export const getResults = async (id: string) => {
                         }
                     }
                 },
-                // Points table information
                 pointsTable: {
                     select: {
                         id: true,
@@ -118,8 +113,8 @@ export const getResults = async (id: string) => {
                 }
             },
             orderBy: [
-                { placement: 'asc' },  // Order by placement (1st, 2nd, 3rd, etc.)
-                { points: 'desc' },    // Then by points (highest first)
+                { placement: 'asc' },
+                { points: 'desc' },
                 { totalKills: 'desc' }
             ]
         });
@@ -131,14 +126,13 @@ export const getResults = async (id: string) => {
     }
 };
 
-
 export const updatePlayerKills = async (gameId: string, teamId: string, playerId: string, kills: number) => {
     if (!gameId || !teamId || !playerId) {
         return null;
     }
 
     try {
-        // Get or create PubgResult
+        // Get PubgResult
         let pubgResult = await prisma.pubgResult.findFirst({
             where: {
                 matchId: gameId,
@@ -162,7 +156,6 @@ export const updatePlayerKills = async (gameId: string, teamId: string, playerId
         let killsChange = 0;
 
         if (currentPlayerKills) {
-            // Update existing record
             newKills = Math.max(0, currentPlayerKills.kills + kills);
             killsChange = newKills - currentPlayerKills.kills;
 
@@ -171,7 +164,6 @@ export const updatePlayerKills = async (gameId: string, teamId: string, playerId
                 data: { kills: newKills }
             });
         } else {
-            // Create new record
             newKills = Math.max(0, kills);
             killsChange = newKills;
 
@@ -188,75 +180,31 @@ export const updatePlayerKills = async (gameId: string, teamId: string, playerId
 
         // Update team total kills
         if (killsChange !== 0) {
+            const newTotalKills = pubgResult.totalKills + killsChange;
+
             await prisma.pubgResult.update({
                 where: { id: pubgResult.id },
                 data: {
-                    totalKills: pubgResult.totalKills + killsChange
+                    totalKills: newTotalKills
                 }
             });
-        }
 
-        // Get updated result
-        const updatedResult = await prisma.pubgResult.findUnique({
-            where: { id: pubgResult.id },
-            include: {
-                match: {
-                    include: {
-                        tournament: true
-                    }
-                },
-                team: {
-                    include: {
-                        players: {
-                            include: {
-                                playerKills: {
-                                    where: { matchId: gameId }
-                                }
-                            }
-                        }
-                    }
-                },
-                playerKills: {
-                    include: {
-                        player: true
-                    }
-                },
-                group: {
-
-                    include: {
-                        teams: {
-                            include: {
-                                players: true
-
-                            }
-                        },
-                        matches: true,
-                        tournament: true,
-                        round: true
-                    }
-                }
-            }
-        });
-
-        // Send real-time update
-        if (updatedResult) {
-            // Only send the updated kill count
+            // Send real-time update with just the necessary data
             const payload = {
                 gameId,
                 teamId,
-                kills: updatedResult.totalKills // or the correct field for kills
+                kills: newTotalKills
             };
+
             await pusher.trigger('pubg-results', 'update-player-kills', payload);
         }
 
-        return updatedResult;
+        return { success: true, totalKills: pubgResult.totalKills + killsChange };
     } catch (error) {
-        console.error('[PUSHER] Error triggering update-player-kills:', error);
+        console.error('[PUSHER] Error updating player kills:', error);
         return null;
     }
 };
-
-
 
 export const updatePlayerElimination = async (gameId: string, teamId: string, playerId: string) => {
     if (!gameId || !teamId || !playerId) {
@@ -275,11 +223,13 @@ export const updatePlayerElimination = async (gameId: string, teamId: string, pl
             return null;
         }
 
+        // Mark player as eliminated
         await prisma.player.update({
             where: { id: playerId },
             data: { isEliminated: true }
         });
 
+        // Check if team should be eliminated
         const team = await prisma.team.findFirst({
             where: { id: teamId },
             include: {
@@ -296,20 +246,20 @@ export const updatePlayerElimination = async (gameId: string, teamId: string, pl
                 // Calculate position based on current alive teams count
                 const position = pubgResult.aliveTeams;
 
-                // Fetch the points table for this result
+                // Get placement points
                 const pointsTable = await prisma.pointsTable.findUnique({
                     where: { id: pubgResult.pointsTableId },
                 });
-                let placementPoint = 0;
+
+                let placementPoints = 0;
                 if (pointsTable && Array.isArray(pointsTable.ranks)) {
                     const rankEntry = pointsTable.ranks.find((r) => r.rank === position);
                     if (rankEntry) {
-                        placementPoint = rankEntry.placementPoint;
-                    } else {
-                        placementPoint = 0;
+                        placementPoints = rankEntry.placementPoint;
                     }
                 }
-                // All players are eliminated, mark team as eliminated with position
+
+                // Mark team as eliminated
                 await prisma.team.update({
                     where: { id: teamId },
                     data: {
@@ -318,81 +268,36 @@ export const updatePlayerElimination = async (gameId: string, teamId: string, pl
                     }
                 });
 
-                // Update resultEntry with position and eliminated status
-                const updatedResultEntry = {
-                    teamId: teamId,
-                    teamName: team.name,
-                    totalKills: pubgResult.totalKills,
-                    totalPoints: placementPoint + pubgResult.totalKills,
-                    matchesPlayed: 1,
-                    position: placementPoint,
-                    eliminated: true,
-                    eliminatedAt: placementPoint
-                };
-
-                // Decrement alive teams count and update resultEntry in the pubg result
+                // Update PubgResult
+                const newTotalPoints = placementPoints + pubgResult.totalKills;
                 await prisma.pubgResult.update({
                     where: { id: pubgResult.id },
                     data: {
                         aliveTeams: pubgResult.aliveTeams - 1,
-                        resultEntry: [updatedResultEntry]
+                        placement: position,
+                        points: newTotalPoints
                     }
                 });
+
+                // Send real-time update
+                const payload = {
+                    gameId,
+                    teamId,
+                    result: {
+                        placement: position,
+                        points: newTotalPoints,
+                        totalKills: pubgResult.totalKills,
+                        eliminated: true
+                    }
+                };
+
+                await pusher.trigger('pubg-results', 'update-player-elimination', payload);
             }
         }
 
-        const updatedResult = await prisma.pubgResult.findUnique({
-            where: { id: pubgResult.id },
-            include: {
-                match: {
-                    include: {
-                        tournament: true
-                    }
-                },
-                team: {
-                    include: {
-                        players: {
-                            include: {
-                                playerKills: {
-                                    where: { matchId: gameId }
-                                }
-                            }
-                        }
-                    }
-                },
-                playerKills: {
-                    include: {
-                        player: true
-                    }
-                },
-                group: {
-                    include: {
-                        teams: {
-                            include: {
-                                players: true
-                            }
-                        },
-                        matches: true,
-                        tournament: true,
-                        round: true
-                    }
-                }
-            }
-        });
-
-        if (updatedResult) {
-            await pusher.trigger('pubg-results', 'update-player-elimination', {
-                gameId,
-                teamId,
-                result: updatedResult
-            });
-        }
-
-        return updatedResult;
+        return { success: true };
     } catch (error) {
-        console.error('[PUSHER] Error triggering update-player-elimination:', error);
+        console.error('[PUSHER] Error updating player elimination:', error);
         return null;
     }
 };
-
-

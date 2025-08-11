@@ -16,6 +16,22 @@ interface Team {
   rank: number;
 }
 
+interface PlayerKillsData {
+  gameId: string;
+  teamId: string;
+  kills: number;
+}
+
+interface PlayerEliminationData {
+  gameId: string;
+  teamId: string;
+  result: {
+    placement: number;
+    points: number;
+    totalKills: number;
+  };
+}
+
 interface TeamStatsCardProps {
   gameId?: string | null;
 }
@@ -23,36 +39,50 @@ interface TeamStatsCardProps {
 const TeamStatsCard: React.FC<TeamStatsCardProps> = ({ gameId }) => {
   const { data: results, isLoading, error } = useGetResults(gameId || "");
   const { pusherClient, isConnected } = usePusher();
-  const [realtimeResults, setRealtimeResults] = useState<any[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [pusherError, setPusherError] = useState<string | null>(null);
-  const [hasRealtimeData, setHasRealtimeData] = useState(false);
 
-  // Initialize realtime results from API data
+  // Initialize teams from API data
   useEffect(() => {
-    if (results && !hasRealtimeData) {
-      setRealtimeResults(results);
+    if (results && results.length > 0) {
+      const processedTeams = results
+        .filter((result) => result.team.id !== "1")
+        .map((result) => ({
+          ...result.team,
+          status: result.placement > 16 ? "eliminated" : "active",
+          points: result.points,
+          kills: result.totalKills || 0,
+          placement: result.placement,
+        }))
+        .sort((a, b) => b.points - a.points)
+        .map((team, index) => ({
+          ...team,
+          rank: index + 1,
+        }));
+
+      setTeams(processedTeams as Team[]);
     }
-  }, [results, hasRealtimeData]);
+  }, [results]);
 
-  // Handle player kills updates
   const handlePlayerKillsUpdate = useCallback(
-    (data: any) => {
+    (data: PlayerKillsData) => {
       if (data.gameId === gameId) {
-        setRealtimeResults((prev) => {
-          const updatedResults = [...prev];
-          const teamIndex = updatedResults.findIndex(
-            (r) => r.team.id === data.teamId
-          );
-
-          if (teamIndex !== -1) {
-            updatedResults[teamIndex] = {
-              ...updatedResults[teamIndex],
-              totalKills: data.kills,
-            };
-            setHasRealtimeData(true);
-          }
-
-          return updatedResults;
+        setTeams((prevTeams) => {
+          return prevTeams
+            .map((team) => {
+              if (team.id === data.teamId) {
+                return {
+                  ...team,
+                  kills: data.kills,
+                };
+              }
+              return team;
+            })
+            .sort((a, b) => b.points - a.points)
+            .map((team, index) => ({
+              ...team,
+              rank: index + 1,
+            }));
         });
       }
     },
@@ -61,24 +91,31 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({ gameId }) => {
 
   // Handle player elimination updates
   const handlePlayerEliminationUpdate = useCallback(
-    (data: any) => {
+    (data: PlayerEliminationData) => {
       if (data.gameId === gameId) {
-        setRealtimeResults((prev) => {
-          const updatedResults = [...prev];
-          const teamIndex = updatedResults.findIndex(
-            (r) => r.team.id === data.teamId
-          );
+        setTeams((prevTeams) => {
+          const updatedTeams = prevTeams.map((team) => {
+            if (team.id === data.teamId && data.result) {
+              return {
+                ...team,
+                status:
+                  data.result.placement > 16
+                    ? "eliminated"
+                    : ("active" as "eliminated" | "active"),
+                points: data.result.points || team.points,
+                kills: data.result.totalKills || team.kills,
+                placement: data.result.placement || team.placement,
+              };
+            }
+            return team;
+          });
 
-          if (teamIndex !== -1) {
-            updatedResults[teamIndex] = {
-              ...updatedResults[teamIndex],
-              ...data.result,
-            };
-          } else {
-            updatedResults.push(data.result);
-          }
-
-          return updatedResults;
+          return updatedTeams
+            .sort((a, b) => b.points - a.points)
+            .map((team, index) => ({
+              ...team,
+              rank: index + 1,
+            }));
         });
       }
     },
@@ -86,7 +123,7 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({ gameId }) => {
   );
 
   // Handle subscription errors
-  const handleSubscriptionError = useCallback((error: any) => {
+  const handleSubscriptionError = useCallback((error: Error | string) => {
     setPusherError("Failed to subscribe to real-time updates");
   }, []);
 
@@ -121,34 +158,7 @@ const TeamStatsCard: React.FC<TeamStatsCardProps> = ({ gameId }) => {
     } catch (error) {
       setPusherError("Failed to connect to real-time service");
     }
-  }, [
-    pusherClient,
-    gameId,
-    isConnected,
-    handlePlayerKillsUpdate,
-    handlePlayerEliminationUpdate,
-    handleSubscriptionError,
-  ]);
-
-  // Process teams data with memoization
-  const teams: Team[] = useMemo(() => {
-    if (!realtimeResults || realtimeResults.length === 0) return [];
-
-    return realtimeResults
-      .filter((result) => result.team.id !== "1")
-      .map((result) => ({
-        ...result.team,
-        status: result.placement > 16 ? "eliminated" : "active",
-        points: result.points,
-        kills: result.totalKills || 0,
-        placement: result.placement,
-      }))
-      .sort((a, b) => b.points - a.points)
-      .map((team, index) => ({
-        ...team,
-        rank: index + 1,
-      }));
-  }, [realtimeResults]);
+  }, [pusherClient, gameId, isConnected]);
 
   // Status indicator component
   const StatusIndicator: React.FC<{ status: string; isLeader?: boolean }> = ({
